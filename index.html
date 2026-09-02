@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<html lang="id" class="overflow-x-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>MailMX - Platform Stor Gmail Enterprise</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#e7f0ff',
+                            100: '#d0e2ff',
+                            400: '#4293ff',
+                            500: '#1877F2',
+                            600: '#1461cf',
+                            700: '#0f4ea6',
+                        },
+                        surface: {
+                            base: '#f0f2f5',
+                            card: '#ffffff',
+                            border: 'rgba(0, 0, 0, 0.08)',
+                            hover: '#f7f8fa'
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.25s ease-out forwards',
+                        'slide-up': 'slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'count-up': 'countUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        countUp: { '0%': { opacity: '0', transform: 'translateY(4px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            background-color: #f0f2f5; 
+            color: #050505; 
+            background-image: none;
+            font-feature-settings: "ss01";
+        }
+        h1, h2, h3, .font-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.01em; }
+        .font-mono, .tabular-figure { font-family: 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+        /* PANELS - FACEBOOK STYLE (putih, bayangan lembut) */
+        .panel-card { 
+            background: #ffffff; 
+            border: 1px solid rgba(0, 0, 0, 0.06); 
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 16px -8px rgba(0, 0, 0, 0.08);
+        }
+
+        .panel-card-hover { 
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1); 
+        }
+        .panel-card-hover:hover {
+            border-color: rgba(24, 119, 242, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06), 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* LEDGER SIGNATURE CARD */
+        .ledger-card {
+            background:
+                linear-gradient(180deg, #ffffff, #f7f9ff),
+                repeating-linear-gradient(135deg, rgba(24, 119, 242, 0.035) 0px, rgba(24, 119, 242, 0.035) 1px, transparent 1px, transparent 14px);
+            border: 1px solid rgba(24, 119, 242, 0.18);
+        }
+        .ledger-divider {
+            border-top: 1.5px dashed rgba(0, 0, 0, 0.14);
+            position: relative;
+        }
+        .ledger-divider::before, .ledger-divider::after {
+            content: '';
+            position: absolute; top: -6px;
+            width: 12px; height: 12px;
+            background: #f0f2f5;
+            border-radius: 999px;
+        }
+        .ledger-divider::before { left: -28px; }
+        .ledger-divider::after { right: -28px; }
+        
+        /* FORM INPUTS - FACEBOOK STYLE (pill putih, border abu) */
+        .form-input {
+            background: #ffffff;
+            border: 1px solid #dddfe2;
+            color: #050505;
+            transition: all 0.2s ease;
+        }
+        .form-input::placeholder { color: #8a8d91; }
+        .form-input:focus {
+            background: #ffffff;
+            border-color: #1877F2;
+            box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.15);
+        }
+
+        /* BUTTONS */
+        .btn-primary {
+            background: #1877F2;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 1px 2px rgba(24, 80, 201, 0.25);
+            color: #ffffff;
+            transition: all 0.15s ease;
+        }
+        .btn-primary:hover { background: #166fe5; box-shadow: 0 2px 6px rgba(24, 80, 201, 0.35); }
+        .btn-primary:active { transform: translateY(1px); }
+
+        /* ACCENT CHIP (icon wells) */
+        .accent-chip { position: relative; }
+        .accent-chip::after {
+            content: '';
+            position: absolute; inset: 0;
+            border-radius: inherit;
+            box-shadow: inset 0 0 0 1px currentColor;
+            opacity: 0.18;
+        }
+
+        /* CUSTOM UTILITIES */
+        .hidden-auth { display: none !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .custom-scrollbar::-webkit-scrollbar { height: 5px; width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.03); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(24, 119, 242, 0.5); }
+
+        /* TOAST */
+        #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+        .toast-item { pointer-events: auto; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col selection:bg-brand-500/30 selection:text-white">
+
+    <!-- AMBIENT BACKGROUND GLOW - SUBTLE -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div class="absolute top-[-15%] left-[-10%] w-[45%] h-[45%] rounded-full bg-brand-600/8 blur-[150px]"></div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="px-4 sm:px-0"></div>
+
+    <!-- NAVBAR - MODERN GLASS -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-2xl border-b border-slate-200 px-4 py-3 shadow-sm">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            
+            <!-- Logo -->
+            <div class="flex items-center space-x-3 shrink-0 cursor-pointer group" onclick="switchTab('dashboard')">
+                <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-lg text-white shadow-lg shadow-brand-600/25 ring-1 ring-white/10 group-hover:scale-105 transition-all">
+                    <i class="fa-solid fa-envelope-open-text"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-lg font-display font-bold tracking-tight text-slate-900 leading-tight">MailMX</span>
+                    <span class="text-[10px] text-brand-600 font-mono font-semibold tracking-widest uppercase">Platform stor gmail</span>
+                </div>
+            </div>
+
+            <!-- TABS NAV DESKTOP -->
+            <div id="nav-links" class="hidden-auth hidden md:flex items-center space-x-1 py-1 px-1.5 bg-surface-card/70 backdrop-blur-md border border-slate-200 rounded-2xl shadow-inner">
+                <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="nav-tab px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center space-x-2 text-slate-500 hover:text-brand-600 hover:bg-slate-100">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span>
+                </button>
+                <button onclick="switchTab('stor')" id="nav-btn-stor" class="nav-tab px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center space-x-2 text-slate-500 hover:text-brand-600 hover:bg-slate-100">
+                    <i data-lucide="send" class="w-4 h-4"></i><span>Stor Gmail</span>
+                </button>
+                <button onclick="switchTab('harga')" id="nav-btn-harga" class="nav-tab px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center space-x-2 text-slate-500 hover:text-brand-600 hover:bg-slate-100">
+                    <i data-lucide="tag" class="w-4 h-4"></i><span>Harga</span>
+                </button>
+                <button onclick="switchTab('referral')" id="nav-btn-referral" class="nav-tab px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center space-x-2 text-slate-500 hover:text-brand-600 hover:bg-slate-100">
+                    <i data-lucide="users" class="w-4 h-4"></i><span>Referral</span>
+                </button>
+                <button onclick="switchTab('leaderboard')" id="nav-btn-leaderboard" class="nav-tab px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center space-x-2 text-slate-500 hover:text-brand-600 hover:bg-slate-100">
+                    <i data-lucide="trophy" class="w-4 h-4"></i><span>Leaderboard</span>
+                </button>
+                <button onclick="switchTab('buygmail')" id="nav-btn-buygmail" class="nav-tab px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center space-x-2 text-slate-500 hover:text-brand-600 hover:bg-slate-100">
+                    <i data-lucide="shopping-cart" class="w-4 h-4"></i><span>Buy Gmail</span>
+                </button>
+            </div>
+
+            <!-- Auth/Profile Container -->
+            <div id="auth-btn-container" class="shrink-0">
+                <button onclick="switchTab('login')" class="btn-primary px-5 py-2.5 text-xs font-bold text-white rounded-xl transition-all active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Masuk
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <div id="mobile-nav" class="hidden-auth md:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-2xl border-t border-slate-200 px-3 py-2 flex justify-around items-center shadow-2xl">
+        <button onclick="switchTab('dashboard')" id="mobile-nav-dashboard" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 text-[10px] font-semibold py-1.5 px-2 rounded-xl transition">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span>
+        </button>
+        <button onclick="switchTab('stor')" id="mobile-nav-stor" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 text-[10px] font-semibold py-1.5 px-2 rounded-xl transition">
+            <i data-lucide="send" class="w-5 h-5"></i><span>Stor</span>
+        </button>
+        <button onclick="switchTab('harga')" id="mobile-nav-harga" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 text-[10px] font-semibold py-1.5 px-2 rounded-xl transition">
+            <i data-lucide="tag" class="w-5 h-5"></i><span>Harga</span>
+        </button>
+        <button onclick="switchTab('referral')" id="mobile-nav-referral" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 text-[10px] font-semibold py-1.5 px-2 rounded-xl transition">
+            <i data-lucide="users" class="w-5 h-5"></i><span>Referral</span>
+        </button>
+        <button onclick="switchTab('leaderboard')" id="mobile-nav-leaderboard" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 text-[10px] font-semibold py-1.5 px-2 rounded-xl transition">
+            <i data-lucide="trophy" class="w-5 h-5"></i><span>Rank</span>
+        </button>
+        <button onclick="switchTab('buygmail')" id="mobile-nav-buygmail" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 text-[10px] font-semibold py-1.5 px-2 rounded-xl transition">
+            <i data-lucide="shopping-cart" class="w-5 h-5"></i><span>Buy</span>
+        </button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mb-20 md:mb-8 space-y-6 animate-fade-in">
+
+        <!-- SYSTEM BANNERS -->
+        <div id="app-banners" class="hidden-auth grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Warning Banner -->
+            <div class="panel-card p-4 rounded-2xl border-l-4 border-l-amber-400 flex items-center gap-4">
+                <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 shrink-0">
+                    <i class="fa-solid fa-clock text-lg"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider">Jam kerja Penarikan </h4>
+                    <p class="text-xs text-slate-400 mt-0.5 leading-relaxed">Proses penarikan saldo 10-20 menit.</p>
+                </div>
+            </div>
+
+            <!-- WA Channel Banner -->
+            <div class="panel-card p-4 rounded-2xl border-l-4 border-l-emerald-400 flex items-center justify-between gap-4 group cursor-pointer hover:bg-surface-hover/60 transition" onclick="window.open('https://whatsapp.com/channel/0029VbBfreU3QxS0kwO6jl36', '_blank')">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-600 shrink-0">
+                        <i class="fa-brands fa-whatsapp text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider">Komunitas Resmi WhatsApp</h4>
+                        <p class="text-xs text-slate-400 mt-0.5">Info harga, bonus, dan bantuan admin tercepat.</p>
+                    </div>
+                </div>
+                <div class="w-8 h-8 rounded-xl bg-surface-card/80 flex items-center justify-center text-slate-400 group-hover:text-emerald-600 group-hover:bg-emerald-500/20 transition border border-slate-200">
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 1: LOGIN -->
+        <section id="tab-login" class="tab-content max-w-md mx-auto py-8 md:py-12 animate-slide-up">
+            <div class="panel-card p-8 rounded-3xl space-y-6 text-center relative overflow-hidden border-slate-200 shadow-2xl">
+                <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-brand-400 via-indigo-400 to-purple-400"></div>
+                
+                <div class="space-y-3">
+                    <div class="w-16 h-16 bg-brand-500/10 border border-brand-500/20 rounded-2xl flex items-center justify-center mx-auto mb-2 text-brand-600 shadow-inner">
+                        <i class="fa-solid fa-shield-halved text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Masuk ke MailMX</h2>
+                    <p class="text-xs text-slate-400 leading-relaxed max-w-xs mx-auto">Website stor gmail</p>
+                </div>
+
+                <div id="ref-banner" class="hidden p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-600 font-semibold">
+                    <i class="fa-solid fa-gift mr-1"></i> Anda diundang via Link Referral!
+                </div>
+
+                <p id="authError" class="hidden text-xs text-red-600 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 leading-relaxed text-left"></p>
+
+                <button id="googleLoginBtn" onclick="handleGoogleLogin()" class="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-950 font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-white/5 text-sm active:scale-95">
+                    <svg width="18" height="18" viewBox="0 0 48 48">
+                        <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.6 6 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5z"/>
+                        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7C34.6 6 29.6 4 24 4 16 4 9 8.4 6.3 14.7z"/>
+                        <path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4C29.6 35.4 26.9 36 24 36c-5.3 0-9.7-3.4-11.3-8.1l-6.5 5C9 39.5 15.9 44 24 44z"/>
+                        <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.5l6.6 5.4C41.5 35.6 44 30.2 44 24c0-1.2-.1-2.3-.4-3.5z"/>
+                    </svg>
+                    <span id="googleLoginBtnText">Lanjutkan dengan Google</span>
+                </button>
+
+                <div class="pt-4 border-t border-slate-200 flex items-center justify-center gap-2 text-[11px] text-slate-500">
+                    <i class="fa-solid fa-lock text-slate-600"></i> Encrypted Session & Auth Security
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content hidden space-y-6 animate-slide-up">
+            
+            <!-- Welcome Header -->
+            <div class="panel-card rounded-3xl p-6 flex items-center gap-4 border-slate-200">
+                <div class="relative">
+                    <img id="dashboardPhoto" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-brand-500/30 shadow-lg" src="https://via.placeholder.com/150" alt="Profile">
+                    <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 border-2 border-surface-base rounded-full"></div>
+                </div>
+                <div>
+                    <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Pengguna Aktif</p>
+                    <h2 class="text-lg font-display font-bold text-slate-900 tracking-tight"><span id="welcomeUsername">User</span></h2>
+                </div>
+            </div>
+
+            <!-- Ledger Balance Card (Signature) -->
+            <div class="ledger-card panel-card-hover rounded-3xl p-7 sm:p-8 relative overflow-hidden">
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 flex items-center justify-center">
+                                <i class="fa-solid fa-wallet text-xs"></i>
+                            </div>
+                            <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-[0.15em]">Saldo Tersedia</span>
+                        </div>
+                        <h3 id="statBalance" class="font-mono tabular-figure text-4xl sm:text-5xl font-semibold text-slate-900 tracking-tight">Rp 0</h3>
+                    </div>
+                    <button onclick="openWithdrawModal()" class="shrink-0 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-2xl transition-all flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-emerald-600/25 border border-emerald-400/20">
+                        <span>Tarik Saldo</span> <i class="fa-solid fa-arrow-right-long text-xs"></i>
+                    </button>
+                </div>
+                <div class="ledger-divider mt-6 pt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] text-slate-400 font-mono">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle text-emerald-600 text-[6px]"></i> Rate Rp 4.500 / Akun</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-clock text-slate-500 text-[10px]"></i> Pencairan 10&ndash;20 menit</span>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+                <!-- Email Profile Card -->
+                <div class="panel-card p-6 rounded-3xl flex flex-col justify-between border-slate-200 relative overflow-hidden">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Akun Terverifikasi</span>
+                            <div class="w-9 h-9 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-600 flex items-center justify-center shadow-inner">
+                                <i class="fa-solid fa-user-shield text-sm"></i>
+                            </div>
+                        </div>
+                        <h3 id="display-user-email" class="text-xs font-semibold text-slate-700 font-mono truncate">...</h3>
+                    </div>
+                    <div class="mt-4 flex items-center gap-2 text-[11px] font-bold text-emerald-600 bg-emerald-500/10 py-1.5 px-3 rounded-xl border border-emerald-500/20 w-fit">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Terverifikasi
+                    </div>
+                </div>
+
+                <!-- Referral Status Dynamic Card -->
+                <div id="dashboard-referral-card" class="panel-card p-6 rounded-3xl flex flex-col justify-between border-purple-500/20 relative overflow-hidden">
+                    <!-- Dynamic Injection JS -->
+                </div>
+
+                <!-- Quick Action Card -->
+                <div class="panel-card p-6 rounded-3xl flex flex-col justify-between border-brand-500/20 relative overflow-hidden group cursor-pointer hover:border-brand-500/50 transition-all" onclick="switchTab('stor')">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[11px] font-bold text-brand-600 uppercase tracking-wider">Aksi Cepat</span>
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-brand-500/30 group-hover:scale-105 transition-transform">
+                                <i class="fa-solid fa-paper-plane text-sm"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900">Stor Gmail Sekarang</h3>
+                        <p class="text-xs text-slate-400 mt-1">Pembayaran 1x24 jam setelah close.</p>
+                    </div>
+                    <span class="mt-4 text-xs font-bold text-brand-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">Buka Form <i class="fa-solid fa-chevron-right text-[10px]"></i></span>
+                </div>
+
+            </div>
+
+            <!-- Tables Section Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Riwayat Pengiriman -->
+                <div class="panel-card rounded-3xl p-6 flex flex-col border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-brand-600"></i> Riwayat Setoran Gmail
+                        </h3>
+                    </div>
+                    
+                    <!-- Desktop Table -->
+                    <div class="hidden sm:block flex-1 overflow-x-auto custom-scrollbar border border-slate-200 rounded-2xl bg-surface-base/40">
+                        <table class="w-full text-left text-xs whitespace-nowrap">
+                            <thead class="bg-surface-card/90 text-slate-400 uppercase font-bold tracking-wider text-[10px] border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3.5">Tanggal</th>
+                                    <th class="p-3.5">Detail Akun</th>
+                                    <th class="p-3.5">Total Saldo</th>
+                                    <th class="p-3.5 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody" class="divide-y divide-slate-200 text-slate-600">
+                                <tr><td colspan="4" class="p-6 text-center text-slate-500 italic">Memuat data setoran...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Cards List -->
+                    <div id="history-mobile-list" class="sm:hidden space-y-3">
+                        <div class="p-4 text-center text-xs text-slate-500 italic">Memuat data setoran...</div>
+                    </div>
+                </div>
+
+                <!-- Riwayat Penarikan -->
+                <div class="panel-card rounded-3xl p-6 flex flex-col border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-money-bill-transfer text-emerald-600"></i> Riwayat Penarikan Saldo
+                        </h3>
+                    </div>
+
+                    <!-- Desktop Table -->
+                    <div class="hidden sm:block flex-1 overflow-x-auto custom-scrollbar border border-slate-200 rounded-2xl bg-surface-base/40">
+                        <table class="w-full text-left text-xs whitespace-nowrap">
+                            <thead class="bg-surface-card/90 text-slate-400 uppercase font-bold tracking-wider text-[10px] border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3.5">Tanggal</th>
+                                    <th class="p-3.5">Metode</th>
+                                    <th class="p-3.5">Nominal</th>
+                                    <th class="p-3.5 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wd-history-tbody" class="divide-y divide-slate-200 text-slate-600">
+                                <tr><td colspan="4" class="p-6 text-center text-slate-500 italic">Memuat data penarikan...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Cards List -->
+                    <div id="wd-history-mobile-list" class="sm:hidden space-y-3">
+                        <div class="p-4 text-center text-xs text-slate-500 italic">Memuat data penarikan...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: STOR GMAIL -->
+        <section id="tab-stor" class="tab-content hidden animate-slide-up">
+            <div class="max-w-2xl mx-auto panel-card p-6 sm:p-8 rounded-3xl relative overflow-hidden border-slate-200">
+                
+                <div class="border-b border-slate-200 pb-4 mb-6">
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane text-brand-600"></i> Form Stor Gmail
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Masukkan daftar akun sesuai dengan aturan yang ditentukan.</p>
+                </div>
+
+                <!-- Banner saat Stor Gmail ditutup admin -->
+                <div id="stor-closed-banner" class="hidden mb-5 p-5 rounded-2xl border border-red-500/25 bg-red-500/5 text-center">
+                    <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/25 text-red-600 flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-circle-pause text-xl"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900">Stor Gmail Sedang Ditutup</h3>
+                    <p class="text-xs text-slate-400 mt-1">Pengiriman Gmail sedang tidak dibuka oleh admin. Silakan coba beberapa saat lagi.</p>
+                </div>
+
+                <form id="stor-gmail-form" onsubmit="handleStorSubmit(event)" class="space-y-5">
+                    
+                    <!-- Passwords Info -->
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Password Resmi Yang Diizinkan</label>
+                        <div class="p-3.5 bg-surface-base/60 border border-slate-200 rounded-2xl flex flex-wrap gap-2">
+                            <span class="bg-surface-card/80 border border-slate-200 text-slate-600 px-3 py-1 rounded-lg text-xs font-mono font-bold">fineirga</span>
+                            <span class="bg-surface-card/80 border border-slate-200 text-slate-600 px-3 py-1 rounded-lg text-xs font-mono font-bold">prabujaya</span>
+                            <span class="bg-surface-card/80 border border-slate-200 text-slate-600 px-3 py-1 rounded-lg text-xs font-mono font-bold">sgsg1122</span>
+                            <span class="bg-surface-card/80 border border-slate-200 text-slate-600 px-3 py-1 rounded-lg text-xs font-mono font-bold">aass1122</span>
+                        </div>
+                    </div>
+
+                    <!-- Gmail List Input -->
+                    <div>
+                        <label for="gmail-list" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Daftar Gmail (1 Baris = 1 Email)</label>
+                        <textarea id="gmail-list" rows="5" placeholder="contoh1@gmail.com&#10;contoh2@gmail.com" class="form-input w-full px-4 py-3 rounded-2xl text-xs font-mono text-slate-700 outline-none placeholder-slate-600 custom-scrollbar" required></textarea>
+                    </div>
+
+                    <!-- Live Calculator -->
+                    <div class="p-4 bg-surface-base/80 border border-brand-500/20 rounded-2xl flex items-center justify-between shadow-inner">
+                        <div>
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Total Terdeteksi</span>
+                            <span id="calc-count" class="text-base font-extrabold text-brand-600">0 Gmail</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Estimasi Hasil (<span id="calc-tier">Rp 0</span>)</span>
+                            <span id="calc-total" class="text-lg font-black text-emerald-600">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="input-password" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Password Akun</label>
+                            <input type="text" id="input-password" placeholder="masukan Password" class="form-input w-full px-4 py-3 rounded-xl text-xs text-slate-700 outline-none" required>
+                        </div>
+                        <div>
+                            <label for="input-wa" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Nomor WhatsApp</label>
+                            <input type="text" id="input-wa" placeholder="08123456789" class="form-input w-full px-4 py-3 rounded-xl text-xs text-slate-700 outline-none" required>
+                        </div>
+                    </div>
+
+                    <div id="stor-alert" class="hidden p-3 rounded-xl text-xs font-medium border"></div>
+
+                    <button type="submit" id="btn-submit-stor" class="btn-primary w-full py-3.5 text-white font-bold rounded-xl transition text-xs active:scale-95">
+                        Kirim 
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- TAB 4: HARGA -->
+        <section id="tab-harga" class="tab-content hidden animate-slide-up">
+            <div class="max-w-md mx-auto space-y-6">
+                <div class="text-center space-y-1 mb-6">
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Harga Flat, Tanpa Ribet</h2>
+                    <p class="text-xs text-slate-400">Harga sama untuk semua jumlah setoran — mau 1 akun atau 100+ akun, tetap sama.</p>
+                </div>
+
+                <div class="panel-card p-8 rounded-3xl flex flex-col items-center text-center space-y-4 border-emerald-500/20 relative overflow-hidden">
+                    <span class="px-3 py-1 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded-full text-[10px] font-bold uppercase tracking-wider">Harga Flat &middot; Berlaku Untuk Semua Jumlah</span>
+                    <div>
+                        <div class="text-5xl font-black text-emerald-600 my-1">Rp 4.500 <span class="text-sm text-slate-500 font-normal">/akun</span></div>
+                        <p class="text-xs text-slate-400 mt-2">Dihitung hanya dari Gmail berstatus <strong class="text-slate-600">Good</strong>. Setor 1, 10, 50, atau 100+ akun sekaligus, harga per akunnya tetap Rp 4.500.</p>
+                    </div>
+                    <button onclick="switchTab('stor')" class="btn-primary w-full py-3 text-white text-sm font-bold rounded-xl transition active:scale-95">Stor Sekarang</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: REFERRAL -->
+        <section id="tab-referral" class="tab-content hidden animate-slide-up">
+            <div class="max-w-2xl mx-auto space-y-6">
+                
+                <div class="panel-card p-6 sm:p-8 rounded-3xl space-y-6 relative overflow-hidden border-purple-500/20">
+                    <div class="text-center space-y-2 relative">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-600 mb-1 border border-purple-500/20">
+                            <i class="fa-solid fa-gift text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-black text-slate-900 tracking-tight">PROGRAM REFERRAL REWARD</h3>
+                        <p class="text-purple-300 font-bold text-sm">Dapatkan 50% Bonus dari Setoran Pertama Teman!</p>
+                        <p class="text-[11px] text-slate-400">Bonus otomatis masuk saldo kamu, tanpa perlu klaim.</p>
+                    </div>
+
+                    <!-- Steps -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-600 relative">
+                        <div class="bg-surface-base/50 p-3.5 rounded-2xl border border-slate-200">
+                            <h5 class="text-slate-900 font-bold mb-0.5">1. Bagikan Link</h5>
+                            <p class="text-[11px] text-slate-400">Undang teman lewat link referral kamu.</p>
+                        </div>
+                        <div class="bg-surface-base/50 p-3.5 rounded-2xl border border-slate-200">
+                            <h5 class="text-slate-900 font-bold mb-0.5">2. Teman Stor Gmail</h5>
+                            <p class="text-[11px] text-slate-400">Teman daftar & mengirim stor gmail pertamanya.</p>
+                        </div>
+                        <div class="bg-surface-base/50 p-3.5 rounded-2xl border border-slate-200">
+                            <h5 class="text-slate-900 font-bold mb-0.5">3. Bonus Otomatis</h5>
+                            <p class="text-[11px] text-slate-400">50% hasil stor pertama teman masuk ke saldo referral kamu. Stor selanjutnya milik teman 100%.</p>
+                        </div>
+                    </div>
+
+                    <!-- Saldo Referral (Claimable) -->
+                    <div class="ledger-card p-5 rounded-2xl text-center space-y-3 relative">
+                        <div>
+                            <span class="text-[11px] font-bold text-purple-300 uppercase tracking-wider">Saldo Referral (Belum Diklaim)</span>
+                            <h4 id="ref-unclaimed-balance" class="font-mono tabular-figure text-3xl font-semibold text-slate-900 mt-1">Rp 0</h4>
+                            <p class="text-[11px] text-slate-500 mt-1">Klaim untuk masukkan ke saldo utama, baru bisa ditarik ke e-wallet.</p>
+                        </div>
+                        <button id="btnClaimReferral" onclick="claimReferralBalance()" disabled class="w-full py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-surface-card disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold rounded-xl text-xs transition active:scale-95 shadow-lg shadow-purple-600/20 border border-purple-400/20 disabled:border-slate-200 disabled:shadow-none">
+                            <span id="btnClaimReferralText">Klaim ke Saldo Utama</span>
+                        </button>
+                    </div>
+
+                    <!-- Total Bonus Section (statistik sepanjang waktu) -->
+                    <div class="bg-surface-base/70 p-5 rounded-2xl border border-purple-500/20 text-center space-y-1 relative">
+                        <span class="text-[11px] font-bold text-purple-300 uppercase tracking-wider">Total Bonus Referral (Sepanjang Waktu)</span>
+                        <h4 id="ref-total-bonus" class="font-mono tabular-figure text-xl font-semibold text-slate-900">Rp 0</h4>
+                        <p id="ref-total-desc" class="text-xs text-slate-400 pt-1">Belum ada teman yang menyetor.</p>
+                    </div>
+
+                    <!-- Copy Box -->
+                    <div class="relative">
+                        <label for="referralLinkBox" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Link Referral Anda</label>
+                        <div class="flex gap-2">
+                            <div id="referralLinkBox" class="flex-1 form-input rounded-xl px-3.5 py-2.5 text-xs font-mono text-purple-600 truncate flex items-center bg-surface-base">...</div>
+                            <button id="btnCopyRef" onclick="copyReferralLink()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shrink-0 flex items-center gap-1.5 active:scale-95 shadow-lg shadow-purple-600/20 border border-purple-400/20">
+                                <i class="fa-solid fa-copy"></i> Salin
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Status Teman -->
+                    <div class="space-y-3 relative">
+                        <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Daftar Undangan Teman</h4>
+                        <ul id="referralList" class="text-xs bg-surface-base/60 border border-slate-200 rounded-2xl divide-y divide-slate-200 overflow-hidden">
+                            <li class="p-4 text-slate-500 text-center italic">Memuat data referral...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 6: LEADERBOARD -->
+        <section id="tab-leaderboard" class="tab-content hidden animate-slide-up">
+            <div class="max-w-2xl mx-auto space-y-6">
+
+                <!-- Leaderboard Penyetor Gmail (Bulanan) -->
+                <div class="panel-card p-6 sm:p-8 rounded-3xl space-y-5 relative overflow-hidden border-amber-300">
+                    <div class="text-center space-y-2">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 mb-1 border border-amber-500/20">
+                            <i class="fa-solid fa-trophy text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-display font-bold text-slate-900 tracking-tight">TOP PENYETOR GMAIL</h3>
+                        <p id="leaderboard-month-label" class="text-xs text-slate-500">Periode bulan ini &middot; reset otomatis tiap tanggal 1</p>
+                    </div>
+                    <ul id="leaderboard-submitters" class="divide-y divide-slate-200 rounded-2xl border border-slate-200 overflow-hidden">
+                        <li class="p-4 text-slate-500 text-center italic text-xs">Memuat data...</li>
+                    </ul>
+                </div>
+
+                <!-- Leaderboard Referral (Sepanjang Waktu) -->
+                <div class="panel-card p-6 sm:p-8 rounded-3xl space-y-5 relative overflow-hidden border-purple-300">
+                    <div class="text-center space-y-2">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-600 mb-1 border border-purple-500/20">
+                            <i class="fa-solid fa-crown text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-display font-bold text-slate-900 tracking-tight">TOP REFERRAL</h3>
+                        <p class="text-xs text-slate-500">Total saldo diterima dari referral &middot; sepanjang waktu</p>
+                    </div>
+                    <ul id="leaderboard-referrals" class="divide-y divide-slate-200 rounded-2xl border border-slate-200 overflow-hidden">
+                        <li class="p-4 text-slate-500 text-center italic text-xs">Memuat data...</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 7: BUY GMAIL -->
+        <section id="tab-buygmail" class="tab-content hidden animate-slide-up">
+            <div class="max-w-2xl mx-auto space-y-6">
+
+                <!-- Toko Card -->
+                <div class="panel-card p-6 sm:p-8 rounded-3xl space-y-5 relative overflow-hidden border-brand-500/20">
+                    <div class="text-center space-y-2">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-500/10 text-brand-600 mb-1 border border-brand-500/20">
+                            <i class="fa-solid fa-shop text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-display font-bold text-slate-900 tracking-tight">BUY GMAIL</h3>
+                        <p class="text-xs text-slate-500">Beli akun Gmail siap pakai, dibayar pakai saldo kamu.</p>
+                    </div>
+
+                    <!-- Banner toko tutup -->
+                    <div id="buygmail-closed-banner" class="hidden p-5 rounded-2xl border border-red-500/25 bg-red-500/5 text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/25 text-red-600 flex items-center justify-center mx-auto mb-3">
+                            <i class="fa-solid fa-circle-pause text-xl"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900">Toko Sedang Tutup</h3>
+                        <p class="text-xs text-slate-500 mt-1">Buy Gmail sedang tidak dibuka oleh admin. Silakan coba beberapa saat lagi.</p>
+                    </div>
+
+                    <div id="buygmail-store-content">
+                        <!-- Stat baris -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-surface-base/70 p-4 rounded-2xl border border-slate-200 text-center">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Stok Tersedia</span>
+                                <span id="buygmail-stock" class="font-mono tabular-figure text-xl font-bold text-emerald-600">0</span>
+                            </div>
+                            <div class="bg-surface-base/70 p-4 rounded-2xl border border-slate-200 text-center">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Harga / Akun</span>
+                                <span id="buygmail-price" class="font-mono tabular-figure text-xl font-bold text-slate-900">Rp 0</span>
+                            </div>
+                        </div>
+
+                        <!-- Form Beli -->
+                        <div class="space-y-3 mt-5">
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Jumlah Akun</label>
+                                <input type="number" id="input-buygmail-qty" min="1" value="1" oninput="updateBuyGmailPreview()" class="form-input w-full px-4 py-3 rounded-xl text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">No. WhatsApp (opsional, agar admin mudah menghubungi)</label>
+                                <input type="text" id="input-buygmail-wa" placeholder="Contoh: 08123456789" class="form-input w-full px-4 py-3 rounded-xl text-sm outline-none">
+                            </div>
+                        </div>
+
+                        <div class="ledger-divider mt-5 pt-4 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Bayar</span>
+                            <span id="buygmail-total" class="font-mono tabular-figure text-xl font-bold text-slate-900">Rp 0</span>
+                        </div>
+
+                        <p id="buygmail-alert" class="hidden text-xs font-medium p-3 rounded-xl mt-3"></p>
+
+                        <button id="btn-buygmail-submit" onclick="submitBuyGmailOrder()" class="btn-primary w-full py-3.5 text-white font-bold rounded-xl transition text-sm active:scale-95 mt-4">
+                            Beli dengan Saldo
+                        </button>
+                        <p class="text-[11px] text-slate-400 text-center mt-2">Saldo kamu saat ini: <strong id="buygmail-balance-ref" class="text-slate-600">Rp 0</strong></p>
+                    </div>
+                </div>
+
+                <!-- Pesanan Saya -->
+                <div class="panel-card p-6 sm:p-8 rounded-3xl space-y-4">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-receipt text-brand-600"></i> Pesanan Saya
+                    </h3>
+                    <div id="buygmail-orders-list" class="space-y-3">
+                        <p class="text-xs text-slate-500 italic text-center py-4">Memuat pesanan kamu...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL POPUP PROMO REFERRAL -->
+    <div id="referralPromoPopup" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[200] hidden items-center justify-center p-4">
+        <div class="panel-card w-full max-w-sm p-6 rounded-3xl text-center space-y-4 border-purple-500/30 relative animate-slide-up shadow-2xl">
+            <button onclick="closePromoPopup()" aria-label="Tutup modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-900 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="w-14 h-14 bg-purple-500/20 text-purple-600 rounded-2xl flex items-center justify-center text-2xl mx-auto border border-purple-500/30">
+                <i class="fa-solid fa-gift"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-black text-slate-900">UNDANG TEMAN</h3>
+                <p class="text-purple-600 font-bold text-sm mt-0.5">Dapatkan Bonus 50% dari Setoran Pertama!</p>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+                Ajak teman Anda bergabung. Saat teman melakukan stor gmail pertama dan dibayar, <strong>50% hasilnya otomatis masuk ke saldo Anda</strong>.
+            </p>
+            <button onclick="goToReferralFromPopup()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs transition active:scale-95 shadow-lg shadow-purple-600/20 border border-purple-400/20">
+                Buka Program Referral
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: DETAIL HASIL VALIDASI USER -->
+    <div id="userResultModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
+        <div class="panel-card w-full max-w-lg p-6 rounded-3xl relative flex flex-col max-h-[85vh] animate-slide-up border-slate-200 shadow-2xl">
+            <button onclick="closeUserResultModal()" aria-label="Tutup modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-900 bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="mb-4">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-brand-600"></i> Detail Validasi Akun
+                </h3>
+                <p id="userModalSubDate" class="text-xs text-slate-400 mt-0.5 font-mono"></p>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar border border-slate-200 rounded-2xl bg-surface-base/60 mb-4">
+                <table class="w-full text-left text-xs whitespace-nowrap">
+                    <thead class="bg-surface-card sticky top-0 text-slate-400 uppercase font-bold text-[10px] border-b border-slate-200">
+                        <tr><th class="p-3">Email</th><th class="p-3 text-right">Status Validasi</th></tr>
+                    </thead>
+                    <tbody id="userModalEmailTbody" class="divide-y divide-slate-200 text-slate-700"></tbody>
+                </table>
+            </div>
+
+            <div class="grid grid-cols-4 gap-2 text-center text-xs mb-4">
+                <div class="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl"><span class="block text-[10px] text-slate-400">Good</span><span id="uStatGood" class="font-bold text-emerald-600 text-sm">0</span></div>
+                <div class="p-2 bg-red-500/10 border border-red-500/20 rounded-xl"><span class="block text-[10px] text-slate-400">Disabled</span><span id="uStatDisabled" class="font-bold text-red-600 text-sm">0</span></div>
+                <div class="p-2 bg-brand-500/10 border border-brand-500/20 rounded-xl"><span class="block text-[10px] text-slate-400">Verif</span><span id="uStatVerif" class="font-bold text-brand-600 text-sm">0</span></div>
+                <div class="p-2 bg-surface-card/80 border border-slate-200 rounded-xl"><span class="block text-[10px] text-slate-400">Not exist</span><span id="uStatNotExist" class="font-bold text-slate-600 text-sm">0</span></div>
+            </div>
+
+            <button onclick="closeUserResultModal()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold rounded-xl text-xs transition border border-slate-200">Tutup Modal</button>
+        </div>
+    </div>
+
+    <!-- MODAL: TARIK SALDO -->
+    <div id="withdrawModal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
+        <div class="panel-card w-full max-w-sm p-6 rounded-3xl relative animate-slide-up border-slate-200 shadow-2xl">
+            <button onclick="closeWithdrawModal()" aria-label="Tutup modal penarikan" class="absolute top-4 right-4 text-slate-400 hover:text-slate-900 bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="mb-5">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-wallet text-emerald-600"></i> Form Tarik Saldo
+                </h3>
+            </div>
+
+            <form onsubmit="handleWithdrawSubmit(event)" class="space-y-4">
+                <div>
+                    <label for="wd-wallet-type" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Metode E-Wallet / Bank</label>
+                    <select id="wd-wallet-type" class="form-input w-full px-3.5 py-2.5 rounded-xl text-xs text-slate-900 outline-none">
+                        <option value="DANA">DANA</option>
+                        <option value="GoPay">GoPay</option>
+                        <option value="OVO">OVO</option>
+                        <option value="ShopeePay">ShopeePay</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="wd-wallet-number" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Nomor Tujuan & Atas Nama</label>
+                    <input type="text" id="wd-wallet-number" placeholder="0812... (A.N. Nama)" class="form-input w-full px-3.5 py-2.5 rounded-xl text-xs text-slate-900 outline-none" required>
+                </div>
+                <div>
+                    <label for="wd-amount" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Nominal (Min. Rp 11.000)</label>
+                    <input type="number" id="wd-amount" min="11000" placeholder="11000" class="form-input w-full px-3.5 py-2.5 rounded-xl text-xs text-slate-900 outline-none" required>
+                </div>
+                <div id="wd-alert" class="hidden p-3 rounded-xl text-xs font-medium border mt-2"></div>
+                <button type="submit" id="btn-submit-wd" class="w-full mt-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition text-xs shadow-lg shadow-emerald-600/20 active:scale-95 border border-emerald-400/20">
+                    Kirim Pengajuan
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FIREBASE MODULE & INTEGRATED LOGIC (TIDAK DIUBAH) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import {
+            getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import {
+            getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, onSnapshot, runTransaction, getDocs
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbPe4CQJP9IWzRrOMeN96c60mZe0FjVpw",
+            authDomain: "mailmx-3bf2b.firebaseapp.com",
+            projectId: "mailmx-3bf2b",
+            storageBucket: "mailmx-3bf2b.firebasestorage.app",
+            messagingSenderId: "590976503111",
+            appId: "1:590976503111:web:948f8d92b657b169115062"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        setPersistence(auth, browserLocalPersistence);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        let currentUser = null;
+        let userCurrentBalance = 0;
+        let unsubscribeUser = null;
+        let unsubscribeSubmissions = null;
+        let unsubscribeWithdrawals = null;
+        let unsubscribeReferrals = null;
+        let unsubscribeStorStatus = null;
+        let storGmailOpen = true;
+        let acceptedPasswords = ["fineirga", "prabujaya", "sgsg1122", "aass1122"];
+        window.cachedUserSubmissions = [];
+
+        // Toast Notification Function
+        window.showToast = function(type, message) {
+            const container = document.getElementById('toast-container');
+            if(!container) return;
+            const toast = document.createElement('div');
+            
+            let bg = 'bg-white border-slate-200 text-slate-700';
+            let icon = '<i class="fa-solid fa-circle-info text-brand-600"></i>';
+
+            if(type === 'success') {
+                bg = 'bg-white border-emerald-300 text-emerald-700';
+                icon = '<i class="fa-solid fa-circle-check text-emerald-600"></i>';
+            } else if(type === 'error') {
+                bg = 'bg-white border-red-300 text-red-700';
+                icon = '<i class="fa-solid fa-triangle-exclamation text-red-600"></i>';
+            } else if(type === 'warning') {
+                bg = 'bg-white border-amber-300 text-amber-700';
+                icon = '<i class="fa-solid fa-triangle-exclamation text-amber-600"></i>';
+            }
+
+            toast.className = `toast-item px-4 py-3 rounded-xl border ${bg} shadow-xl flex items-center gap-3 text-xs font-semibold max-w-sm`;
+            toast.innerHTML = `${icon}<span class="flex-1">${message}</span><button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-900"><i class="fa-solid fa-xmark"></i></button>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => { if(toast.parentNode) toast.remove(); }, 4000);
+        };
+
+        window.switchTab = function (tabId) {
+            if (!currentUser && (tabId === 'dashboard' || tabId === 'stor' || tabId === 'referral' || tabId === 'leaderboard' || tabId === 'buygmail')) {
+                tabId = 'login';
+            }
+
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.className = "nav-tab px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap flex items-center space-x-2 text-slate-500 hover:text-brand-600 hover:bg-slate-100";
+            });
+
+            const activeBtn = document.getElementById('nav-btn-' + tabId);
+            if (activeBtn) {
+                activeBtn.className = "nav-tab px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center space-x-2 bg-brand-600 text-white shadow-md shadow-brand-600/25";
+            }
+
+            document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+                btn.className = "mobile-nav-btn flex flex-col items-center gap-1 text-slate-400 text-[10px] font-semibold py-1 px-3 rounded-xl";
+            });
+            const activeMobileBtn = document.getElementById('mobile-nav-' + tabId);
+            if(activeMobileBtn) {
+                activeMobileBtn.className = "mobile-nav-btn flex flex-col items-center gap-1 text-brand-600 text-[10px] font-bold py-1 px-3 rounded-xl bg-brand-500/10 border border-brand-500/20";
+            }
+            
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            if (tabId === 'leaderboard' && currentUser) {
+                loadLeaderboards();
+            }
+            if (tabId === 'buygmail' && currentUser) {
+                loadBuyGmailStore();
+            }
+        };
+
+        window.handleGoogleLogin = async function () {
+            hideError();
+            const btn = document.getElementById('googleLoginBtn');
+            const btnText = document.getElementById('googleLoginBtnText');
+            btn.disabled = true;
+            btnText.textContent = "Menghubungkan Google...";
+
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (err) {
+                showError("Gagal masuk: " + err.message);
+                btn.disabled = false;
+                btnText.textContent = "Lanjutkan dengan Google";
+            }
+        };
+
+        window.handleLogout = function () {
+            if (unsubscribeUser) unsubscribeUser();
+            if (unsubscribeSubmissions) unsubscribeSubmissions();
+            if (unsubscribeWithdrawals) unsubscribeWithdrawals();
+            if (unsubscribeReferrals) unsubscribeReferrals();
+            if (unsubscribeStorStatus) unsubscribeStorStatus();
+            signOut(auth).then(() => {
+                location.reload();
+            });
+        };
+
+        window.copyReferralLink = function () {
+            const text = document.getElementById('referralLinkBox').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('success', 'Link Referral berhasil disalin!');
+                const btn = document.getElementById('btnCopyRef');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Disalin';
+                setTimeout(() => { btn.innerHTML = original; }, 2000);
+            });
+        };
+
+        window.openWithdrawModal = function() {
+            document.getElementById('withdrawModal').classList.remove('hidden');
+            document.getElementById('withdrawModal').classList.add('flex');
+        };
+
+        window.closeWithdrawModal = function() {
+            document.getElementById('withdrawModal').classList.add('hidden');
+            document.getElementById('withdrawModal').classList.remove('flex');
+            const alertBox = document.getElementById('wd-alert');
+            if (alertBox) alertBox.classList.add('hidden');
+        };
+
+        window.closePromoPopup = function() {
+            document.getElementById('referralPromoPopup').classList.add('hidden');
+            document.getElementById('referralPromoPopup').classList.remove('flex');
+        };
+
+        window.goToReferralFromPopup = function() {
+            closePromoPopup();
+            switchTab('referral');
+        };
+
+        // Klaim saldo referral -> saldo utama. SELALU self-write (user menulis
+        // dokumennya sendiri), jadi aman dari isu izin Firestore lintas-user.
+        window.claimReferralBalance = async function() {
+            if (!currentUser) return;
+            const btn = document.getElementById('btnClaimReferral');
+            const btnText = document.getElementById('btnClaimReferralText');
+            if (btn) btn.disabled = true;
+            if (btnText) btnText.textContent = "Memproses...";
+
+            try {
+                const userRef = doc(db, "users", currentUser.uid);
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userRef);
+                    if (!userDoc.exists()) throw new Error("Data user tidak ditemukan.");
+                    const data = userDoc.data();
+                    const claimable = data.referralBalance || 0;
+                    if (claimable <= 0) throw new Error("Tidak ada saldo referral untuk diklaim.");
+
+                    transaction.update(userRef, {
+                        balance: (data.balance || 0) + claimable,
+                        referralBalance: 0
+                    });
+                });
+                showToast('success', 'Saldo referral berhasil masuk ke saldo utama.');
+            } catch (err) {
+                showToast('error', err.message);
+            } finally {
+                if (btn) btn.disabled = false;
+                if (btnText) btnText.textContent = "Klaim ke Saldo Utama";
+            }
+        };
+
+        function showError(msg) {
+            const el = document.getElementById('authError');
+            if (el) {
+                el.textContent = msg;
+                el.classList.remove('hidden');
+            }
+        }
+
+        function hideError() {
+            const el = document.getElementById('authError');
+            if (el) el.classList.add('hidden');
+        }
+
+        function calculateRates(count) {
+            // Harga flat: Rp 4.500 / Gmail Good, berapa pun jumlah setorannya.
+            const price = count >= 1 ? 4500 : 0;
+            return { price, total: count * price };
+        }        
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const refFromUrl = urlParams.get('ref');
+        if (refFromUrl) {
+            localStorage.setItem('pending_ref_code', refFromUrl);
+            const refBanner = document.getElementById('ref-banner');
+            if (refBanner) refBanner.classList.remove('hidden');
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                currentUser = null;
+                if (unsubscribeUser) unsubscribeUser();
+                if (unsubscribeSubmissions) unsubscribeSubmissions();
+                if (unsubscribeWithdrawals) unsubscribeWithdrawals();
+                if (unsubscribeReferrals) unsubscribeReferrals();
+                if (unsubscribeStorStatus) unsubscribeStorStatus();
+                document.querySelectorAll('.hidden-auth').forEach(el => el.classList.add('hidden-auth'));
+                document.getElementById('auth-btn-container').innerHTML = `
+                    <button onclick="switchTab('login')" class="btn-primary px-5 py-2.5 text-xs font-bold text-white rounded-xl transition-all active:scale-95 flex items-center gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i> Masuk
+                    </button>
+                `;
+                window.switchTab('login');
+                return;
+            }
+
+            currentUser = user;
+
+            try {
+                const userRef = doc(db, "users", user.uid);
+                const snap = await getDoc(userRef);
+
+                if (!snap.exists()) {
+                    let ip = null;
+                    try {
+                        const ipRes = await fetch('https://api.ipify.org?format=json');
+                        const ipData = await ipRes.json();
+                        ip = ipData.ip;
+                    } catch (e) { ip = null; }
+
+                    const refCode = localStorage.getItem('pending_ref_code');
+                    let referredBy = null;
+
+                    if (refCode && refCode !== user.uid) {
+                        try {
+                            const referrerRef = doc(db, "users", refCode);
+                            const referrerSnap = await getDoc(referrerRef);
+                            if (referrerSnap.exists()) {
+                                referredBy = refCode;
+                                // CATATAN PENTING: kita TIDAK menulis apa pun ke dokumen milik
+                                // pengundang di sini. Menulis ke dokumen user lain dari sesi
+                                // user yang baru daftar sangat rentan diblokir oleh Firestore
+                                // Security Rules (rules standar hanya izinkan user menulis
+                                // dokumennya sendiri). Field "referredBy" cukup disimpan di
+                                // dokumen milik user baru ini sendiri (self-write, selalu aman).
+                                // Daftar teman untuk pengundang nanti diambil lewat query
+                                // where("referredBy","==",uid), bukan array tersimpan.
+                            }
+                        } catch (refErr) { console.warn("Referral init error:", refErr); }
+                    }
+
+                    await setDoc(userRef, {
+                        name: user.displayName || user.email,
+                        email: user.email,
+                        balance: 0,
+                        referralBonusGiven: false,
+                        referredBy: referredBy,
+                        totalSubmittedAccumulated: 0,
+                        totalGoodAccumulated: 0,
+                        ip: ip,
+                        createdAt: Date.now()
+                    });
+
+                    localStorage.removeItem('pending_ref_code');
+                }
+
+                renderDashboard(user);
+            } catch (err) {
+                console.error("Auth process error:", err);
+                renderDashboard(user);
+            }
+        });
+
+        async function renderDashboard(user) {
+            document.querySelectorAll('.hidden-auth').forEach(el => el.classList.remove('hidden-auth'));
+
+            document.getElementById('auth-btn-container').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <img class="w-8 h-8 rounded-xl ring-2 ring-brand-500/30 object-cover shadow-md" src="${user.photoURL || 'https://via.placeholder.com/150'}" alt="User">
+                    <button onclick="handleLogout()" class="px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-red-600 bg-slate-100 hover:bg-red-50 rounded-xl transition border border-slate-200"><i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar</button>
+                </div>
+            `;
+
+            document.getElementById('display-user-email').textContent = user.email;
+            document.getElementById('welcomeUsername').textContent = user.displayName || user.email;
+            document.getElementById('dashboardPhoto').src = user.photoURL || 'https://via.placeholder.com/150';
+
+            const refLink = `${window.location.origin}${window.location.pathname}?ref=${user.uid}`;
+            document.getElementById('referralLinkBox').textContent = refLink;
+
+            if (unsubscribeUser) unsubscribeUser();
+            let userCurrentReferralBalance = 0;
+            unsubscribeUser = onSnapshot(doc(db, "users", user.uid), (snap) => {
+                if(snap.exists()) {
+                    const data = snap.data();
+                    userCurrentBalance = data.balance || 0;
+                    userCurrentReferralBalance = data.referralBalance || 0;
+                    window.currentReferralBalance = userCurrentReferralBalance;
+                    document.getElementById('statBalance').textContent = `Rp ${userCurrentBalance.toLocaleString('id-ID')}`;
+
+                    const refBalanceEl = document.getElementById('ref-unclaimed-balance');
+                    const claimBtn = document.getElementById('btnClaimReferral');
+                    if (refBalanceEl) refBalanceEl.textContent = `Rp ${userCurrentReferralBalance.toLocaleString('id-ID')}`;
+                    if (claimBtn) claimBtn.disabled = userCurrentReferralBalance <= 0;
+
+                    const dashRefFigure = document.querySelector('#dashboard-referral-card h3');
+                    if (dashRefFigure) dashRefFigure.textContent = `Rp ${userCurrentReferralBalance.toLocaleString('id-ID')}`;
+
+                    if (!sessionStorage.getItem('referralPopupShown')) {
+                        setTimeout(() => {
+                            document.getElementById('referralPromoPopup').classList.remove('hidden');
+                            document.getElementById('referralPromoPopup').classList.add('flex');
+                            sessionStorage.setItem('referralPopupShown', 'true');
+                        }, 1000);
+                    }
+                }
+            });
+
+            // Daftar teman yang diundang (query, BUKAN array di dokumen sendiri) —
+            // ini agar tidak bergantung pada tulisan lintas-user yang rawan diblokir
+            // oleh Firestore Security Rules.
+            if (unsubscribeReferrals) unsubscribeReferrals();
+            const referralsQuery = query(collection(db, "users"), where("referredBy", "==", user.uid));
+            unsubscribeReferrals = onSnapshot(referralsQuery, (querySnap) => {
+                const referrals = [];
+                querySnap.forEach(d => referrals.push({ uid: d.id, ...d.data() }));
+                referrals.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+                const totalBonusRp = referrals.reduce((sum, r) => sum + (r.referralBonusAmount || 0), 0);
+                const bonusGivenCount = referrals.filter(r => r.referralBonusGiven === true).length;
+
+                const dashRefCard = document.getElementById('dashboard-referral-card');
+                if (dashRefCard) {
+                    const unclaimed = window.currentReferralBalance || 0;
+                    dashRefCard.innerHTML = `
+                        <div class="flex flex-col h-full justify-between">
+                            <div>
+                                <span class="text-[11px] font-bold text-purple-600 uppercase tracking-wider">Saldo Referral</span>
+                                <h3 class="font-mono tabular-figure text-xl font-semibold text-slate-900 mt-1">Rp ${unclaimed.toLocaleString('id-ID')}</h3>
+                                <p class="text-xs text-slate-400 mt-1">${bonusGivenCount} dari ${referrals.length} teman sudah bonus</p>
+                            </div>
+                            <button onclick="switchTab('referral')" class="mt-4 w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-purple-600/20 active:scale-95 border border-purple-400/20">
+                                ${unclaimed > 0 ? 'Klaim Sekarang' : 'Lihat Referral'}
+                            </button>
+                        </div>
+                    `;
+                }
+
+                const totalBonusEl = document.getElementById('ref-total-bonus');
+                const totalDescEl = document.getElementById('ref-total-desc');
+                if (totalBonusEl) totalBonusEl.textContent = `Rp ${totalBonusRp.toLocaleString('id-ID')}`;
+                if (totalDescEl) {
+                    totalDescEl.textContent = referrals.length === 0
+                        ? 'Belum ada teman yang menyetor.'
+                        : `Dari ${bonusGivenCount} teman yang sudah stor gmail pertama, dari total ${referrals.length} teman diundang.`;
+                }
+
+                const list = document.getElementById('referralList');
+                if (list) {
+                    list.innerHTML = '';
+                    if (referrals.length === 0) {
+                        list.innerHTML = '<li class="p-4 text-slate-500 text-center italic">Belum ada teman bergabung.</li>';
+                    } else {
+                        referrals.forEach((r, idx) => {
+                            const bonusRp = r.referralBonusAmount || 0;
+                            const statusBadge = r.referralBonusGiven 
+                                ? `<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-bold rounded-full text-[10px]">Bonus Diterima ✅</span>` 
+                                : `<span class="px-2.5 py-1 bg-amber-500/10 text-amber-600 border border-amber-500/20 font-semibold rounded-full text-[10px]">Belum Stor ⏳</span>`;
+                            
+                            list.innerHTML += `
+                                <li class="p-3.5 flex items-center justify-between text-slate-700 border-b border-slate-200 last:border-0">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-surface-card flex items-center justify-center text-slate-400 font-bold border border-slate-200">${idx+1}</div>
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-slate-900">${r.name || 'Teman Undangan'}</span>
+                                            <span class="text-[10px] text-slate-400">Bonus: <strong class="text-purple-600">Rp ${bonusRp.toLocaleString('id-ID')}</strong></span>
+                                        </div>
+                                    </div>
+                                    <div>${statusBadge}</div>
+                                </li>
+                            `;
+                        });
+                    }
+                }
+            }, (error) => {
+                console.error("Gagal memuat daftar referral:", error);
+            });
+
+            setupRealtimeSubmissionsListener(user.uid);
+            setupRealtimeWithdrawalsListener(user.uid);
+            setupStorStatusListener();
+            window.switchTab('dashboard');
+        }
+
+        document.getElementById('gmail-list').addEventListener('input', function() {
+            const text = this.value;
+            const emails = text.split('\n').map(e => e.trim()).filter(e => e.length > 0 && e.includes('@'));
+            const count = emails.length;
+            const { price, total } = calculateRates(count);
+
+            document.getElementById('calc-count').innerText = `${count} Gmail`;
+            document.getElementById('calc-tier').innerText = price > 0 ? `Rp ${price.toLocaleString('id-ID')}/Akun` : 'Min. 1 Akun';
+            document.getElementById('calc-total').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+        });
+
+        window.handleStorSubmit = async function (e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const alertBox = document.getElementById('stor-alert');
+
+            // --- STATUS STOR GMAIL (diatur admin lewat toggle Open/Close, real-time) ---
+            if (!storGmailOpen) {
+                alertBox.className = "p-3 rounded-xl text-xs font-medium bg-red-500/10 text-red-600 border border-red-500/20 block";
+                alertBox.innerText = "Stor Gmail sedang DITUTUP oleh admin. Silakan coba beberapa saat lagi.";
+                return;
+            }
+            // --- AKHIR STATUS STOR GMAIL ---
+
+            const inputPass = document.getElementById('input-password').value.trim();
+            const waNumber = document.getElementById('input-wa').value.trim();
+            const gmailListText = document.getElementById('gmail-list').value;
+            const submitBtn = document.getElementById('btn-submit-stor');
+
+            const emails = gmailListText.split('\n').map(email => email.trim()).filter(email => email.length > 0);
+            const count = emails.length;
+            const { total: currentTotalValue } = calculateRates(count);
+
+            if (count < 1) {
+                alertBox.className = "p-3 rounded-xl text-xs font-medium bg-red-500/10 text-red-600 border border-red-500/20 block";
+                alertBox.innerText = "Minimal setoran adalah 1 Akun Gmail.";
+                return;
+            }
+
+            if (!acceptedPasswords.map(p => p.toLowerCase()).includes(inputPass.toLowerCase())) {
+                alertBox.className = "p-3 rounded-xl text-xs font-medium bg-red-500/10 text-red-600 border border-red-500/20 block";
+                alertBox.innerText = "Password tidak sesuai dengan kata sandi resmi yang diizinkan!";
+                return;
+            }
+
+            submitBtn.innerText = "Mengirim...";
+            submitBtn.disabled = true;
+
+            try {
+                const emailResults = emails.map(email => ({
+                    email: email,
+                    status: "Proses"
+                }));
+
+                await addDoc(collection(db, "submissions"), {
+                    uid: currentUser.uid,
+                    userEmail: currentUser.email,
+                    userName: currentUser.displayName || currentUser.email,
+                    waNumber: waNumber,
+                    gmailList: gmailListText,
+                    emailResults: emailResults,
+                    count: count,
+                    totalRp: currentTotalValue,
+                    password: inputPass,
+                    status: "Proses",
+                    stats: { good: 0, disabled: 0, verif: 0, notExist: 0 },
+                    creditedRp: 0,
+                    createdAt: Date.now()
+                });
+
+                showToast('success', 'Setoran Gmail berhasil dikirim.');
+                
+                document.getElementById('gmail-list').value = "";
+                document.getElementById('input-password').value = "";
+                document.getElementById('input-wa').value = "";
+                document.getElementById('calc-count').innerText = "0 Gmail";
+                document.getElementById('calc-total').innerText = "Rp 0";
+
+                setTimeout(() => {
+                    window.switchTab('dashboard');
+                    alertBox.classList.add('hidden');
+                }, 1000);
+
+            } catch (err) {
+                showToast('error', 'Gagal mengirim: ' + err.message);
+            } finally {
+                submitBtn.innerText = "Kirim Setoran Akun";
+                submitBtn.disabled = false;
+            }
+        };
+
+        window.handleWithdrawSubmit = async function(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const walletType = document.getElementById('wd-wallet-type').value;
+            const walletNum = document.getElementById('wd-wallet-number').value.trim();
+            const amount = parseInt(document.getElementById('wd-amount').value);
+            const alertBox = document.getElementById('wd-alert');
+            const submitBtn = document.getElementById('btn-submit-wd');
+
+            if (isNaN(amount) || amount < 11000) {
+                alertBox.className = "p-3 rounded-xl text-xs font-medium bg-red-500/10 text-red-600 border border-red-500/20 block mt-2";
+                alertBox.innerText = "Minimal penarikan saldo adalah Rp 11.000.";
+                return;
+            }
+
+            if (amount > userCurrentBalance) {
+                alertBox.className = "p-3 rounded-xl text-xs font-medium bg-red-500/10 text-red-600 border border-red-500/20 block mt-2";
+                alertBox.innerText = "Saldo Anda tidak mencukupi untuk penarikan ini.";
+                return;
+            }
+
+            submitBtn.innerText = "Memproses...";
+            submitBtn.disabled = true;
+
+            try {
+                await addDoc(collection(db, "withdrawals"), {
+                    uid: currentUser.uid,
+                    userEmail: currentUser.email,
+                    userName: currentUser.displayName || currentUser.email,
+                    walletType: walletType,
+                    walletNumber: walletNum,
+                    amount: amount,
+                    status: "Proses",
+                    createdAt: Date.now()
+                });
+
+                const newBalance = userCurrentBalance - amount;
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, { balance: newBalance });
+                
+                showToast('success', 'Pengajuan penarikan berhasil dibuat.');
+                
+                document.getElementById('wd-wallet-number').value = '';
+                document.getElementById('wd-amount').value = '';
+
+                setTimeout(() => { 
+                    closeWithdrawModal(); 
+                    window.switchTab('dashboard');
+                    alertBox.classList.add('hidden');
+                }, 1000);
+            } catch (err) {
+                showToast('error', 'Gagal penarikan: ' + err.message);
+            } finally {
+                submitBtn.innerText = "Kirim Pengajuan";
+                submitBtn.disabled = false;
+            }
+        };
+
+        function setupRealtimeSubmissionsListener(uid) {
+            if (unsubscribeSubmissions) unsubscribeSubmissions();
+
+            const q = query(collection(db, "submissions"), where("uid", "==", uid));
+            unsubscribeSubmissions = onSnapshot(q, (snapshot) => {
+                const submissions = [];
+                snapshot.forEach(docSnap => {
+                    submissions.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                submissions.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                window.cachedUserSubmissions = submissions;
+                renderHistoryTable(submissions);
+            }, (error) => {
+                console.error("Submissions listener error:", error);
+            });
+        }
+
+        function renderHistoryTable(submissions) {
+            const tbody = document.getElementById('history-tbody');
+            const mobileList = document.getElementById('history-mobile-list');
+
+            if (!tbody || !mobileList) return;
+
+            if (submissions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500 italic">Belum ada riwayat setoran.</td></tr>`;
+                mobileList.innerHTML = `<div class="p-4 text-center text-xs text-slate-500 italic">Belum ada riwayat setoran.</div>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            mobileList.innerHTML = '';
+
+            submissions.forEach(item => {
+                const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('id-ID') : '-';
+                
+                let good = 0;
+                let rejected = 0; 
+
+                if (item.stats) {
+                    good = item.stats.good || 0;
+                    rejected = (item.stats.disabled || 0) + (item.stats.verif || 0) + (item.stats.notExist || 0);
+                }
+
+                let rpDisplay = '';
+                if (item.status === 'Proses' || !item.status) {
+                    rpDisplay = `<span class="text-slate-500 font-medium text-[11px] italic">Estimasi: Rp ${(item.totalRp || 0).toLocaleString('id-ID')}</span>`;
+                } else {
+                    rpDisplay = `<span class="text-emerald-600 font-black text-sm">+ Rp ${(item.creditedRp || 0).toLocaleString('id-ID')}</span>`;
+                }
+                
+                let statusBadge = '';
+                const st = item.status || 'Proses';
+                if (st === 'Good') {
+                    statusBadge = `<span class="text-[10px] bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded border border-emerald-500/20 font-bold"><i class="fa-solid fa-check"></i> Selesai</span>`;
+                } else if (st === 'Disabled') {
+                    statusBadge = `<span class="text-[10px] bg-red-500/10 text-red-600 px-2 py-0.5 rounded border border-red-500/20 font-bold">Ditolak</span>`;
+                } else if (st === 'Verif') {
+                    statusBadge = `<span class="text-[10px] bg-brand-500/10 text-brand-600 px-2 py-0.5 rounded border border-brand-500/20 font-bold">Verif</span>`;
+                } else {
+                    statusBadge = `<span class="text-[10px] bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded border border-amber-500/20 font-bold"><i class="fa-solid fa-spinner fa-spin"></i> Dicek Admin</span>`;
+                }
+
+                let detailAkunHtml = '';
+                if (st === 'Proses') {
+                    detailAkunHtml = `<span class="block text-[10px] text-amber-600 mt-0.5">Menunggu pengecekan...</span>`;
+                } else {
+                    detailAkunHtml = `<span class="block text-[10px] text-slate-400 mt-0.5"><strong class="text-emerald-600">${good} Good</strong> | <strong class="text-red-600">${rejected} Ditolak</strong></span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-100 transition group">
+                        <td class="p-3.5 font-medium text-slate-400">${dateStr}</td>
+                        <td class="p-3.5">
+                            <span class="block font-bold text-slate-900">${item.count} Total Disetor</span>
+                            ${detailAkunHtml}
+                        </td>
+                        <td class="p-3.5">${rpDisplay}</td>
+                        <td class="p-3.5 text-right flex items-center justify-end gap-2">
+                            ${statusBadge}
+                            <button onclick="openUserResultModal('${item.id}')" aria-label="Lihat detail validasi setoran" class="text-brand-600 hover:text-white hover:bg-brand-600 bg-brand-500/10 p-1.5 rounded-lg border border-brand-500/20 transition ml-2" title="Lihat detail per email">
+                                <i class="fa-solid fa-eye text-xs"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+
+                mobileList.innerHTML += `
+                    <div class="p-4 rounded-2xl bg-surface-base/60 border border-slate-200 flex flex-col gap-3 cursor-pointer hover:border-slate-200 transition" onclick="openUserResultModal('${item.id}')">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs font-bold text-slate-900 block mb-1">${item.count} Total Disetor</span>
+                                ${detailAkunHtml}
+                            </div>
+                            ${statusBadge}
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-200">
+                            <div class="text-[10px] text-slate-500">${dateStr}</div>
+                            ${rpDisplay}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        window.openUserResultModal = function(subId) {
+            const sub = (window.cachedUserSubmissions || []).find(s => s.id === subId);
+            if (!sub) return;
+
+            document.getElementById('userModalSubDate').textContent = `Tgl: ${sub.createdAt ? new Date(sub.createdAt).toLocaleString('id-ID') : '-'}`;
+
+            let results = sub.emailResults;
+            if (!results || !Array.isArray(results) || results.length === 0) {
+                const rawList = sub.gmailList || "";
+                results = rawList.split('\n').map(e => e.trim()).filter(e => e.length > 0).map(em => ({
+                    email: em,
+                    status: sub.status || 'Proses'
+                }));
+            }
+
+            const tbody = document.getElementById('userModalEmailTbody');
+            tbody.innerHTML = '';
+
+            let good = 0, disabled = 0, verif = 0, notExist = 0;
+
+            results.forEach(item => {
+                let badgeClass = 'text-amber-600 bg-amber-500/10 border-amber-500/20';
+                if (item.status === 'Good') { good++; badgeClass = 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20'; }
+                else if (item.status === 'Disabled') { disabled++; badgeClass = 'text-red-600 bg-red-500/10 border-red-500/20'; }
+                else if (item.status === 'Verif') { verif++; badgeClass = 'text-brand-600 bg-brand-500/10 border-brand-500/20'; }
+                else if (item.status === 'Not exist') { notExist++; badgeClass = 'text-slate-400 bg-surface-card border-slate-200'; }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-100 transition">
+                        <td class="p-3 font-mono text-slate-600 text-xs">${item.email}</td>
+                        <td class="p-3 text-right">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeClass}">${item.status}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if (sub.stats) {
+                good = sub.stats.good !== undefined ? sub.stats.good : good;
+                disabled = sub.stats.disabled !== undefined ? sub.stats.disabled : disabled;
+                verif = sub.stats.verif !== undefined ? sub.stats.verif : verif;
+                notExist = sub.stats.notExist !== undefined ? sub.stats.notExist : notExist;
+            }
+
+            document.getElementById('uStatGood').textContent = good;
+            document.getElementById('uStatDisabled').textContent = disabled;
+            document.getElementById('uStatVerif').textContent = verif;
+            document.getElementById('uStatNotExist').textContent = notExist;
+
+            document.getElementById('userResultModal').classList.remove('hidden');
+            document.getElementById('userResultModal').classList.add('flex');
+        };
+
+        window.closeUserResultModal = function() {
+            document.getElementById('userResultModal').classList.add('hidden');
+            document.getElementById('userResultModal').classList.remove('flex');
+        };
+
+        function setupRealtimeWithdrawalsListener(uid) {
+            if (unsubscribeWithdrawals) unsubscribeWithdrawals();
+            
+            const q = query(collection(db, "withdrawals"), where("uid", "==", uid));
+            unsubscribeWithdrawals = onSnapshot(q, (snapshot) => {
+                const withdrawals = [];
+                snapshot.forEach(docSnap => {
+                    withdrawals.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                withdrawals.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+                const tbody = document.getElementById('wd-history-tbody');
+                const mobileList = document.getElementById('wd-history-mobile-list');
+
+                if (!tbody || !mobileList) return;
+
+                if (withdrawals.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500 italic">Belum ada penarikan.</td></tr>`;
+                    mobileList.innerHTML = `<div class="p-4 text-center text-xs text-slate-500 italic">Belum ada penarikan.</div>`;
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                mobileList.innerHTML = '';
+
+                withdrawals.forEach(item => {
+                    const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('id-ID') : '-';
+                    
+                    let statusBadge = '';
+                    if (item.status === 'Sukses') {
+                        statusBadge = `<span class="text-[10px] bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded border border-emerald-500/20 font-bold">Sukses</span>`;
+                    } else if (item.status === 'Gagal') {
+                        statusBadge = `<span class="text-[10px] bg-red-500/10 text-red-600 px-2 py-0.5 rounded border border-red-500/20 font-bold">Ditolak</span>`;
+                    } else {
+                        statusBadge = `<span class="text-[10px] bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded border border-amber-500/20 font-bold">Proses</span>`;
+                    }
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-100 transition">
+                            <td class="p-3.5 font-medium text-slate-400">${dateStr}</td>
+                            <td class="p-3.5">
+                                <span class="block font-bold text-slate-900">${item.walletType || 'DANA'}</span>
+                                <span class="block font-mono text-[10px] text-slate-500">${item.walletNumber || '-'}</span>
+                            </td>
+                            <td class="p-3.5 text-emerald-600 font-bold">Rp ${(item.amount || 0).toLocaleString('id-ID')}</td>
+                            <td class="p-3.5 text-right">${statusBadge}</td>
+                        </tr>
+                    `;
+
+                    mobileList.innerHTML += `
+                        <div class="p-4 rounded-2xl bg-surface-base/60 border border-slate-200 flex items-center justify-between">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-slate-900">${item.walletType || 'E-Wallet'}</span>
+                                    ${statusBadge}
+                                </div>
+                                <div class="text-[11px] font-mono text-slate-400">${item.walletNumber || '-'}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs font-black text-emerald-600">Rp ${(item.amount || 0).toLocaleString('id-ID')}</div>
+                                <div class="text-[10px] text-slate-500">${dateStr}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }, (error) => {
+                console.error("Gagal memuat penarikan:", error);
+            });
+        }
+
+        // -------------------------
+        // STATUS STOR GMAIL (dikontrol admin, real-time, tanpa ubah kode)
+        // -------------------------
+        function setupStorStatusListener() {
+            if (unsubscribeStorStatus) unsubscribeStorStatus();
+            const settingsRef = doc(db, "settings", "general");
+            unsubscribeStorStatus = onSnapshot(settingsRef, (snap) => {
+                const data = snap.exists() ? snap.data() : {};
+                storGmailOpen = data.storGmailOpen !== false;
+                acceptedPasswords = Array.isArray(data.acceptedPasswords) ? data.acceptedPasswords : ["fineirga", "prabujaya", "sgsg1122", "aass1122"];
+                renderStorStatusUI();
+            }, (err) => console.warn("Gagal memuat status stor gmail:", err));
+        }
+
+        function renderStorStatusUI() {
+            const banner = document.getElementById('stor-closed-banner');
+            const form = document.getElementById('stor-gmail-form');
+            const btn = document.getElementById('btn-submit-stor');
+            if (!banner || !form) return;
+
+            if (storGmailOpen) {
+                banner.classList.add('hidden');
+                form.classList.remove('opacity-40', 'pointer-events-none');
+                if (btn) { btn.disabled = false; }
+            } else {
+                banner.classList.remove('hidden');
+                form.classList.add('opacity-40', 'pointer-events-none');
+                if (btn) { btn.disabled = true; }
+            }
+        }
+
+        // -------------------------
+        // LEADERBOARD
+        // -------------------------
+        const MONTH_NAMES_ID = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+        function rankBadge(rank) {
+            if (rank === 1) return '<div class="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center font-black text-xs shadow-md shadow-amber-400/40"><i class="fa-solid fa-crown text-[11px]"></i></div>';
+            if (rank === 2) return '<div class="w-8 h-8 rounded-full bg-slate-300 text-white flex items-center justify-center font-black text-xs">2</div>';
+            if (rank === 3) return '<div class="w-8 h-8 rounded-full bg-amber-700 text-white flex items-center justify-center font-black text-xs">3</div>';
+            return `<div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs border border-slate-200">${rank}</div>`;
+        }
+
+        function maskName(name) {
+            if (!name) return 'User';
+            // Tampilkan nama depan saja + inisial, demi privasi di leaderboard publik
+            const parts = String(name).trim().split(' ');
+            if (parts.length === 1) return parts[0];
+            return `${parts[0]} ${parts[1].charAt(0)}.`;
+        }
+
+        window.loadLeaderboards = async function() {
+            loadSubmitterLeaderboard();
+            loadReferralLeaderboard();
+        };
+
+        async function loadSubmitterLeaderboard() {
+            const listEl = document.getElementById('leaderboard-submitters');
+            const labelEl = document.getElementById('leaderboard-month-label');
+            if (!listEl) return;
+
+            const now = new Date();
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+            const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).getTime();
+            if (labelEl) labelEl.textContent = `Periode ${MONTH_NAMES_ID[now.getMonth()]} ${now.getFullYear()} \u00b7 reset otomatis tiap tanggal 1`;
+
+            try {
+                const q = query(
+                    collection(db, "submissions"),
+                    where("createdAt", ">=", monthStart),
+                    where("createdAt", "<", monthEnd)
+                );
+                const snap = await getDocs(q);
+
+                const perUser = {};
+                snap.forEach(docSnap => {
+                    const d = docSnap.data();
+                    const good = d.stats?.good || 0;
+                    if (good <= 0 || !d.uid) return; // hanya hitung Gmail berstatus Good
+                    if (!perUser[d.uid]) perUser[d.uid] = { name: d.userName || d.userEmail || 'User', good: 0, rp: 0 };
+                    perUser[d.uid].good += good;
+                    perUser[d.uid].rp += (d.creditedRp || 0);
+                });
+
+                const ranked = Object.values(perUser).sort((a, b) => b.good - a.good).slice(0, 10);
+
+                if (ranked.length === 0) {
+                    listEl.innerHTML = '<li class="p-4 text-slate-500 text-center italic text-xs">Belum ada setoran Good bulan ini.</li>';
+                    return;
+                }
+
+                listEl.innerHTML = ranked.map((u, i) => `
+                    <li class="p-3.5 flex items-center justify-between gap-3 bg-white">
+                        <div class="flex items-center gap-3 min-w-0">
+                            ${rankBadge(i + 1)}
+                            <span class="font-bold text-slate-900 text-sm truncate">${maskName(u.name)}</span>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="block font-mono tabular-figure font-bold text-emerald-600 text-sm">${u.good} Good</span>
+                            <span class="block text-[10px] text-slate-500 font-mono">Rp ${u.rp.toLocaleString('id-ID')}</span>
+                        </div>
+                    </li>
+                `).join('');
+            } catch (err) {
+                console.error('Gagal memuat leaderboard penyetor:', err);
+                listEl.innerHTML = `<li class="p-4 text-red-500 text-center text-xs">Gagal memuat data: ${err.message}</li>`;
+            }
+        }
+
+        async function loadReferralLeaderboard() {
+            const listEl = document.getElementById('leaderboard-referrals');
+            if (!listEl) return;
+
+            try {
+                // Dihitung langsung dari data mentah (users yang punya referredBy +
+                // referralBonusGiven), PERSIS seperti cara tab Referral menghitung
+                // total bonus milik user sendiri. Ini sengaja TIDAK bergantung pada
+                // field tersimpan terpisah (totalReferralEarned), supaya tidak pernah
+                // ada risiko datanya tidak sinkron/ketinggalan lagi.
+                const snap = await getDocs(collection(db, "users"));
+
+                const allUsers = [];
+                snap.forEach(docSnap => allUsers.push({ id: docSnap.id, ...docSnap.data() }));
+
+                const totals = {};
+                allUsers.forEach(u => {
+                    if (u.referredBy && u.referralBonusGiven && (u.referralBonusAmount || 0) > 0) {
+                        totals[u.referredBy] = (totals[u.referredBy] || 0) + u.referralBonusAmount;
+                    }
+                });
+
+                const ranked = Object.entries(totals)
+                    .map(([referrerId, total]) => {
+                        const referrer = allUsers.find(u => u.id === referrerId);
+                        return { name: referrer?.name || referrer?.email || 'User', total };
+                    })
+                    .sort((a, b) => b.total - a.total)
+                    .slice(0, 10);
+
+                if (ranked.length === 0) {
+                    listEl.innerHTML = '<li class="p-4 text-slate-500 text-center italic text-xs">Belum ada yang menerima bonus referral.</li>';
+                    return;
+                }
+
+                listEl.innerHTML = ranked.map((u, i) => `
+                    <li class="p-3.5 flex items-center justify-between gap-3 bg-white">
+                        <div class="flex items-center gap-3 min-w-0">
+                            ${rankBadge(i + 1)}
+                            <span class="font-bold text-slate-900 text-sm truncate">${maskName(u.name)}</span>
+                        </div>
+                        <span class="font-mono tabular-figure font-bold text-purple-600 text-sm shrink-0">Rp ${u.total.toLocaleString('id-ID')}</span>
+                    </li>
+                `).join('');
+            } catch (err) {
+                console.error('Gagal memuat leaderboard referral:', err);
+                listEl.innerHTML = `<li class="p-4 text-red-500 text-center text-xs">Gagal memuat data: ${err.message}</li>`;
+            }
+        }
+
+        // -------------------------
+        // BUY GMAIL
+        // -------------------------
+        let unsubscribeBuyOrders = null;
+        let buyGmailState = { available: 0, price: 0, isOpen: false };
+
+        window.loadBuyGmailStore = async function() {
+            const closedBanner = document.getElementById('buygmail-closed-banner');
+            const storeContent = document.getElementById('buygmail-store-content');
+            if (!closedBanner || !storeContent) return;
+
+            try {
+                const snap = await getDoc(doc(db, "settings", "general"));
+                const data = snap.exists() ? snap.data() : {};
+                buyGmailState.available = data.buyGmailAvailable || 0;
+                buyGmailState.price = data.buyGmailPrice || 0;
+                buyGmailState.isOpen = data.buyGmailOpen === true;
+
+                document.getElementById('buygmail-stock').textContent = buyGmailState.available.toLocaleString('id-ID');
+                document.getElementById('buygmail-price').textContent = `Rp ${buyGmailState.price.toLocaleString('id-ID')}`;
+                document.getElementById('buygmail-balance-ref').textContent = `Rp ${userCurrentBalance.toLocaleString('id-ID')}`;
+
+                if (!buyGmailState.isOpen) {
+                    closedBanner.querySelector('h3').textContent = 'Toko Sedang Tutup';
+                    closedBanner.querySelector('p').textContent = 'Buy Gmail sedang tidak dibuka oleh admin. Silakan coba beberapa saat lagi.';
+                    closedBanner.classList.remove('hidden');
+                    storeContent.classList.add('opacity-40', 'pointer-events-none');
+                } else if (buyGmailState.available <= 0) {
+                    closedBanner.querySelector('h3').textContent = 'Stok Habis';
+                    closedBanner.querySelector('p').textContent = 'Stok Gmail sedang habis. Silakan cek lagi nanti.';
+                    closedBanner.classList.remove('hidden');
+                    storeContent.classList.add('opacity-40', 'pointer-events-none');
+                } else {
+                    closedBanner.classList.add('hidden');
+                    storeContent.classList.remove('opacity-40', 'pointer-events-none');
+                }
+
+                updateBuyGmailPreview();
+            } catch (err) {
+                console.error('Gagal memuat toko Buy Gmail:', err);
+            }
+
+            if (currentUser) setupBuyGmailOrdersListener(currentUser.uid);
+        };
+
+        window.updateBuyGmailPreview = function() {
+            const qtyInput = document.getElementById('input-buygmail-qty');
+            if (!qtyInput) return;
+            let qty = parseInt(qtyInput.value, 10) || 0;
+            if (qty < 1) qty = 1;
+            const total = qty * buyGmailState.price;
+            document.getElementById('buygmail-total').textContent = `Rp ${total.toLocaleString('id-ID')}`;
+
+            const alertBox = document.getElementById('buygmail-alert');
+            const btn = document.getElementById('btn-buygmail-submit');
+
+            if (qty > buyGmailState.available) {
+                alertBox.textContent = `Stok tidak cukup. Maksimal ${buyGmailState.available} akun.`;
+                alertBox.className = "text-xs font-medium p-3 rounded-xl mt-3 bg-red-500/10 text-red-600 border border-red-500/20 block";
+                btn.disabled = true;
+            } else if (total > userCurrentBalance) {
+                alertBox.textContent = `Saldo tidak cukup. Total Rp ${total.toLocaleString('id-ID')}, saldo kamu Rp ${userCurrentBalance.toLocaleString('id-ID')}.`;
+                alertBox.className = "text-xs font-medium p-3 rounded-xl mt-3 bg-red-500/10 text-red-600 border border-red-500/20 block";
+                btn.disabled = true;
+            } else {
+                alertBox.classList.add('hidden');
+                btn.disabled = false;
+            }
+        };
+
+        window.submitBuyGmailOrder = async function() {
+            if (!currentUser) return;
+            const qty = parseInt(document.getElementById('input-buygmail-qty').value, 10) || 0;
+            const wa = document.getElementById('input-buygmail-wa').value.trim();
+            const btn = document.getElementById('btn-buygmail-submit');
+
+            if (qty < 1) { showToast('error', 'Jumlah akun tidak valid.'); return; }
+
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.textContent = 'Memproses...';
+
+            try {
+                const userRef = doc(db, "users", currentUser.uid);
+                const settingsRef = doc(db, "settings", "general");
+                const newOrderRef = doc(collection(db, "gmailOrders"));
+
+                await runTransaction(db, async (transaction) => {
+                    const userSnap = await transaction.get(userRef);
+                    const settingsSnap = await transaction.get(settingsRef);
+                    if (!userSnap.exists()) throw new Error('Data user tidak ditemukan.');
+
+                    const userData = userSnap.data();
+                    const settingsData = settingsSnap.exists() ? settingsSnap.data() : {};
+                    const price = settingsData.buyGmailPrice || 0;
+                    const available = settingsData.buyGmailAvailable || 0;
+                    const isOpen = settingsData.buyGmailOpen === true;
+                    const balance = userData.balance || 0;
+                    const total = qty * price;
+
+                    if (!isOpen) throw new Error('Toko sedang tutup.');
+                    if (qty > available) throw new Error('Stok tidak cukup, coba kurangi jumlahnya.');
+                    if (total > balance) throw new Error('Saldo kamu tidak cukup.');
+
+                    // Saldo dipotong langsung (self-write ke dokumen sendiri, selalu aman).
+                    // Counter stok TIDAK disentuh user sama sekali di sini — supaya rules
+                    // Firestore tetap simpel (dokumen settings/general 100% hanya bisa
+                    // ditulis admin). Stok baru benar-benar dikurangi & dikirim saat admin
+                    // memproses pesanan. Kalau ternyata stok habis duluan sebelum diproses,
+                    // pesanan tetap tersimpan sebagai "Tertunda" (saldo aman, tidak hilang)
+                    // sampai admin menambah stok baru.
+                    transaction.update(userRef, {
+                        balance: balance - total,
+                        waNumber: wa || userData.waNumber || null
+                    });
+                    transaction.set(newOrderRef, {
+                        uid: currentUser.uid,
+                        userName: currentUser.displayName || currentUser.email,
+                        userEmail: currentUser.email,
+                        userWa: wa || userData.waNumber || null,
+                        qty: qty,
+                        totalPrice: total,
+                        status: 'pending',
+                        items: [],
+                        createdAt: Date.now()
+                    });
+                });
+
+                showToast('success', 'Pembayaran berhasil! Pesanan kamu sedang diproses admin.');
+                document.getElementById('input-buygmail-qty').value = 1;
+                loadBuyGmailStore();
+            } catch (err) {
+                showToast('error', err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        };
+
+        function setupBuyGmailOrdersListener(uid) {
+            if (unsubscribeBuyOrders) unsubscribeBuyOrders();
+            const q = query(collection(db, "gmailOrders"), where("uid", "==", uid));
+            unsubscribeBuyOrders = onSnapshot(q, (snapshot) => {
+                const orders = [];
+                snapshot.forEach(d => orders.push({ id: d.id, ...d.data() }));
+                orders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                renderBuyGmailOrders(orders);
+            }, (err) => console.error('Gagal memuat pesanan Buy Gmail:', err));
+        }
+
+        function renderBuyGmailOrders(orders) {
+            const list = document.getElementById('buygmail-orders-list');
+            if (!list) return;
+            if (orders.length === 0) {
+                list.innerHTML = '<p class="text-xs text-slate-500 italic text-center py-4">Belum ada pesanan.</p>';
+                return;
+            }
+            list.innerHTML = orders.map(o => {
+                const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString('id-ID') : '-';
+                if (o.status === 'completed' && o.items && o.items.length > 0) {
+                    const itemsHtml = o.items.map(it => `
+                        <div class="flex items-center justify-between gap-2 bg-surface-base/70 px-3 py-2 rounded-lg border border-slate-200">
+                            <span class="font-mono text-[11px] text-slate-700 truncate">${it.email}:${it.password}</span>
+                            <button onclick="copyToClipboard('${it.email}:${it.password}')" class="text-brand-600 hover:text-brand-700 shrink-0"><i class="fa-solid fa-copy text-xs"></i></button>
+                        </div>
+                    `).join('');
+                    return `
+                        <div class="border border-emerald-200 bg-emerald-50/50 rounded-2xl p-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-900">${o.qty} akun &middot; Rp ${(o.totalPrice||0).toLocaleString('id-ID')}</span>
+                                <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded-full text-[10px] font-bold">Selesai ✅</span>
+                            </div>
+                            <div class="space-y-1.5">${itemsHtml}</div>
+                            <span class="text-[10px] text-slate-400">${dateStr}</span>
+                        </div>
+                    `;
+                }
+                return `
+                    <div class="border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
+                        <div>
+                            <span class="block text-xs font-bold text-slate-900">${o.qty} akun &middot; Rp ${(o.totalPrice||0).toLocaleString('id-ID')}</span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">${dateStr}</span>
+                        </div>
+                        <span class="px-2 py-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-full text-[10px] font-bold">Tertunda ⏳</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.copyToClipboard = function(text) {
+            navigator.clipboard.writeText(text).then(() => showToast('success', 'Disalin ke clipboard!'));
+        };
+
+        window.addEventListener("DOMContentLoaded", () => {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
