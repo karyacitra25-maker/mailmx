@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - MailMX</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+                    },
+                    colors: { slate: { 850: '#131b29', 950: '#080b13' } }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { background-color: #080b13; color: #f4f6fb; }
+        h1, h2, h3, .font-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.01em; }
+        .font-mono, .tabular-figure { font-family: 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+        .glass-card {
+            background: linear-gradient(180deg, rgba(19, 25, 39, 0.9), rgba(11, 14, 22, 0.88));
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 20px 40px -20px rgba(0,0,0,0.6);
+        }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.3); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.6); border-radius: 10px; }
+        
+        .admin-nav-btn { position: relative; overflow: hidden; }
+        .admin-nav-btn.active { background: rgba(239, 68, 68, 0.1); color: #f87171; border-color: rgba(239, 68, 68, 0.2); }
+        .admin-nav-btn.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #ef4444; }
+    </style>
+</head>
+<body class="antialiased min-h-screen selection:bg-red-500/30 selection:text-red-200 flex flex-col">
+
+    <!-- LOGIN SCREEN ADMIN -->
+    <div id="admin-login-screen" class="min-h-screen flex items-center justify-center p-4 relative z-10">
+        <div class="fixed inset-0 pointer-events-none -z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950"></div>
+        
+        <div class="glass-card p-8 rounded-3xl space-y-8 max-w-sm w-full shadow-2xl border border-white/5 text-center">
+            <div>
+                <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl flex items-center justify-center mx-auto text-white shadow-lg shadow-red-500/25 mb-4">
+                    <i class="fa-solid fa-bolt text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold tracking-tight text-white">MailMX Admin</h2>
+                <p class="text-xs text-slate-400 mt-1">Authorized personnel only</p>
+            </div>
+            
+            <p id="adminAuthError" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3"></p>
+
+            <button id="adminLoginBtn" onclick="handleAdminLogin()" class="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-900 font-bold py-3.5 px-4 rounded-xl transition shadow-lg text-sm">
+                <i class="fa-brands fa-google text-red-500"></i>
+                <span id="adminLoginBtnText">Login with Google</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN ADMIN DASHBOARD -->
+    <div id="admin-dashboard" class="hidden min-h-screen flex-col md:flex-row bg-slate-950">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-full md:w-64 bg-slate-900/40 border-r border-white/5 flex flex-col shrink-0">
+            <div class="p-6 border-b border-white/5 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-red-500/20 ring-1 ring-white/10">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <span class="block font-extrabold text-lg text-white leading-tight">MailMX</span>
+                    <span class="block text-[10px] text-red-400 font-bold tracking-widest uppercase">Admin Panel</span>
+                </div>
+            </div>
+
+            <!-- STOR GMAIL OPEN/CLOSE TOGGLE -->
+            <div class="p-4 border-b border-white/5">
+                <div id="storStatusCard" class="rounded-xl border p-3.5 transition-colors">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Status Stor Gmail</span>
+                        <span id="storStatusBadge" class="text-[10px] font-black px-2 py-0.5 rounded-full">...</span>
+                    </div>
+                    <button id="btnToggleStorStatus" onclick="toggleStorGmailStatus()" class="w-full mt-2 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-power-off"></i> <span id="btnToggleStorStatusText">Memuat...</span>
+                    </button>
+                </div>
+            </div>
+            <div class="p-4 flex-1 overflow-y-auto custom-scrollbar">
+                <nav class="space-y-1.5">
+                    <button onclick="switchAdminSection('users')" id="btn-sec-users" class="admin-nav-btn active w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-users w-4 text-center"></i> <span>Data Pengguna</span></span>
+                    </button>
+                    <button onclick="switchAdminSection('referrals')" id="btn-sec-referrals" class="admin-nav-btn w-full flex items-center justify-between px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl text-xs font-bold transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-network-wired w-4 text-center"></i> <span>Referral</span></span>
+                    </button>
+                    <button onclick="switchAdminSection('submissions')" id="btn-sec-submissions" class="admin-nav-btn w-full flex items-center justify-between px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl text-xs font-bold transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-envelope-circle-check w-4 text-center"></i> <span>Setoran Gmail</span></span>
+                        <span id="badgePendingSub" class="hidden bg-red-500 text-white font-bold text-[10px] px-2 py-0.5 rounded-full">0</span>
+                    </button>
+                    <button onclick="switchAdminSection('withdrawals')" id="btn-sec-withdrawals" class="admin-nav-btn w-full flex items-center justify-between px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl text-xs font-bold transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-money-bill-transfer w-4 text-center"></i> <span>Penarikan Saldo</span></span>
+                        <span id="badgePendingWd" class="hidden bg-red-500 text-white font-bold text-[10px] px-2 py-0.5 rounded-full">0</span>
+                    </button>
+                    <button onclick="switchAdminSection('settings')" id="btn-sec-settings" class="admin-nav-btn w-full flex items-center justify-between px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl text-xs font-bold transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-gear w-4 text-center"></i> <span>Pengaturan</span></span>
+                    </button>
+                </nav>
+            </div>
+            <div class="p-4 border-t border-white/5">
+                <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition">
+                    <i class="fa-solid fa-right-from-bracket"></i> Keluar
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTENT -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto h-screen relative bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900/50 via-slate-950 to-slate-950 custom-scrollbar">
+            <div class="max-w-7xl mx-auto space-y-6 relative">
+                
+                <!-- SEKSI 1: MANAJEMEN USER -->
+                <section id="section-users" class="admin-section space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/50 p-5 rounded-2xl border border-white/5">
+                        <div>
+                            <h1 class="text-xl font-bold text-white">Database Pengguna</h1>
+                            <p class="text-xs text-slate-400 mt-1">Kelola saldo, IP, dan bonus referral (50% dari setor pertama teman).</p>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <input type="text" id="searchInput" placeholder="Cari Email/Nama..." class="px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none text-white w-full sm:w-60 transition" onkeyup="filterTable()">
+                            <button onclick="loadUsers()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2">
+                                <i class="fa-solid fa-rotate-right"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl overflow-hidden border border-white/5 shadow-xl">
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left text-xs whitespace-nowrap">
+                                <thead class="bg-slate-900/80 text-slate-400 border-b border-white/5 uppercase font-bold text-[10px] tracking-wider">
+                                    <tr>
+                                        <th class="p-4">Info User</th>
+                                        <th class="p-4">Saldo Saat Ini</th>
+                                        <th class="p-4">Statistik Referral</th>
+                                        <th class="p-4">IP & Tgl Daftar</th>
+                                        <th class="p-4 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-tbody" class="divide-y divide-white/5 text-slate-300">
+                                    <tr><td colspan="5" class="p-8 text-center text-slate-500 italic">Memuat data dari Firestore...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SEKSI 2: MANAJEMEN REFERRAL -->
+                <section id="section-referrals" class="admin-section hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/50 p-5 rounded-2xl border border-white/5">
+                        <div>
+                            <h1 class="text-xl font-bold text-white">Manajemen Referral</h1>
+                            <p class="text-xs text-slate-400 mt-1">Bonus 50% otomatis masuk saat teman dibayar pertama kali.</p>
+                        </div>
+                        <button onclick="loadReferrals()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2">
+                            <i class="fa-solid fa-rotate-right"></i> Refresh
+                        </button>
+                    </div>
+
+                    <div class="glass-card rounded-2xl overflow-hidden border border-white/5 shadow-xl">
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left text-xs whitespace-nowrap">
+                                <thead class="bg-slate-900/80 text-slate-400 border-b border-white/5 uppercase font-bold text-[10px] tracking-wider">
+                                    <tr>
+                                        <th class="p-4">Pengundang (User)</th>
+                                        <th class="p-4">Jumlah Teman</th>
+                                        <th class="p-4">Teman Sudah Bonus</th>
+                                        <th class="p-4">Total Bonus (Sepanjang Waktu)</th>
+                                        <th class="p-4">Belum Diklaim</th>
+                                        <th class="p-4 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="referrals-tbody" class="divide-y divide-white/5 text-slate-300">
+                                    <tr><td colspan="6" class="p-8 text-center text-slate-500 italic">Memuat data referral...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SEKSI 3: SETORAN GMAIL -->
+                <section id="section-submissions" class="admin-section hidden space-y-6 flex-col">
+                    
+                    <!-- HEADER & PENCARIAN -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/50 p-5 rounded-2xl border border-white/5">
+                        <div>
+                            <h1 class="text-xl font-bold text-white">Data Setoran Gmail</h1>
+                            <p class="text-xs text-slate-400 mt-1">Daftar setoran dipisah berdasarkan tanggal.</p>
+                        </div>
+                        <div class="flex gap-3 w-full sm:w-auto">
+                            <div class="relative flex-1 sm:w-64">
+                                <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                                <input type="text" id="subSearchInput" onkeyup="renderSubmissions()" placeholder="Cari Nama/Email User..." class="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs outline-none text-white focus:border-red-500 transition">
+                            </div>
+                            <button onclick="loadSubmissions()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2">
+                                <i class="fa-solid fa-rotate-right"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- DAFTAR SETORAN BERDASARKAN TANGGAL -->
+                    <div id="submissions-list-view" class="space-y-4 flex-1">
+                        <!-- Konten akan dimuat oleh JS -->
+                        <div class="p-8 text-center text-slate-500 italic glass-card rounded-2xl border border-white/5">Memuat data setoran...</div>
+                    </div>
+
+                    <!-- DETAIL SETORAN USER (Ditampilkan saat user diklik) -->
+                    <div id="submission-detail-view" class="hidden flex-col bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl relative">
+                        <!-- Toolbar Atas -->
+                        <div class="flex flex-wrap justify-between items-center gap-3 p-4 border-b border-slate-800 bg-slate-900/80 rounded-t-2xl">
+                            <div class="flex items-center gap-2">
+                                <button onclick="closeSubmissionDetail()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2">
+                                    <i class="fa-solid fa-arrow-left"></i> Kembali
+                                </button>
+                                <button onclick="copyAllStorage()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md">
+                                    <i class="fa-solid fa-copy"></i> Copy Semua Storan
+                                </button>
+                            </div>
+                            <div class="text-right">
+                                <span class="block text-sm font-bold text-white" id="detail-user-name">👤 User</span>
+                                <span class="block text-xs text-slate-400 mt-0.5">Setoran: <span id="detail-date" class="text-white"></span> • Total: <span id="detail-total" class="text-white font-bold"></span> Data</span>
+                            </div>
+                        </div>
+
+                        <!-- Data List Table -->
+                        <div class="flex-1 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                            <table class="w-full text-left text-xs whitespace-nowrap">
+                                <thead class="bg-slate-900 sticky top-0 text-slate-400 border-b border-slate-800 uppercase font-bold text-[10px]">
+                                    <tr>
+                                        <th class="p-4">Email / Data</th>
+                                        <th class="p-4 w-40 text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detail-tbody" class="divide-y divide-white/5 text-slate-200">
+                                    <!-- Rows generated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Footer Actions (Simpan) -->
+                        <div class="p-4 bg-slate-900 border-t border-slate-800 flex justify-between items-center rounded-b-2xl">
+                            <div class="text-xs text-slate-400">
+                                Info Credential: <span id="detail-wa" class="font-mono text-emerald-400"></span> | Pass: <span id="detail-pass" class="font-mono text-emerald-400"></span>
+                            </div>
+                            <button type="button" onclick="event.preventDefault(); saveSubmissionDetail()" id="btn-save-sub" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-600/25">
+                                Simpan Hasil
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SEKSI 4: PENARIKAN SALDO -->
+                <section id="section-withdrawals" class="admin-section hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/50 p-5 rounded-2xl border border-white/5">
+                        <div>
+                            <h1 class="text-xl font-bold text-white">Penarikan Saldo</h1>
+                            <p class="text-xs text-slate-400 mt-1">Proses penarikan setelah transfer DANA/E-Wallet.</p>
+                        </div>
+                        <button onclick="loadWithdrawals()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2">
+                            <i class="fa-solid fa-rotate-right"></i> Refresh
+                        </button>
+                    </div>
+
+                    <div class="glass-card rounded-2xl overflow-hidden border border-white/5 shadow-xl">
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left text-xs whitespace-nowrap">
+                                <thead class="bg-slate-900/80 text-slate-400 border-b border-white/5 uppercase font-bold text-[10px] tracking-wider">
+                                    <tr>
+                                        <th class="p-4">Waktu</th>
+                                        <th class="p-4">User</th>
+                                        <th class="p-4">Tujuan Transfer</th>
+                                        <th class="p-4">Nominal</th>
+                                        <th class="p-4">Status</th>
+                                        <th class="p-4 text-right">Aksi Admin</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="withdrawals-tbody" class="divide-y divide-white/5 text-slate-300">
+                                    <tr><td colspan="6" class="p-8 text-center text-slate-500 italic">Memuat data penarikan...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SEKSI 5: PENGATURAN -->
+                <section id="section-settings" class="admin-section hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/50 p-5 rounded-2xl border border-white/5">
+                        <div>
+                            <h1 class="text-xl font-bold text-white">Pengaturan</h1>
+                            <p class="text-xs text-slate-400 mt-1">Atur status stor gmail & password yang diterima — tanpa ubah kode.</p>
+                        </div>
+                    </div>
+
+                    <!-- Kartu: Status Buka/Tutup Stor Gmail -->
+                    <div class="glass-card rounded-2xl p-6 border border-white/5">
+                        <h3 class="text-sm font-bold text-white mb-1">Status Penerimaan Stor Gmail</h3>
+                        <p class="text-xs text-slate-400 mb-4">Saat ditutup, semua user akan melihat pesan "Sedang Tutup" dan tidak bisa mengirim gmail sama sekali.</p>
+                        <div id="storStatusCardFull" class="rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Status Saat Ini:</span>
+                                <span id="storStatusBadgeFull" class="text-xs font-black px-3 py-1 rounded-full">...</span>
+                            </div>
+                            <button id="btnToggleStorStatusFull" onclick="toggleStorGmailStatus()" class="px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-power-off"></i> <span id="btnToggleStorStatusFullText">Memuat...</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Kartu: Password yang Diterima -->
+                    <div class="glass-card rounded-2xl p-6 border border-white/5">
+                        <h3 class="text-sm font-bold text-white mb-1">Password Stor Gmail yang Diterima</h3>
+                        <p class="text-xs text-slate-400 mb-4">User wajib mengisi salah satu password di bawah ini saat mengirim gmail. Tambah/hapus bebas, langsung berlaku ke semua user tanpa perlu ubah kode website.</p>
+
+                        <div id="password-list" class="space-y-2 mb-4">
+                            <p class="text-xs text-slate-500 italic">Memuat daftar password...</p>
+                        </div>
+
+                        <div class="flex gap-2 pt-3 border-t border-white/5">
+                            <input type="text" id="input-new-password" placeholder="Ketik password baru..." class="flex-1 px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white outline-none focus:border-emerald-500 transition">
+                            <button onclick="addAcceptedPassword()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shrink-0">
+                                <i class="fa-solid fa-plus"></i> Tambah
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Kartu: Perbaikan Data Leaderboard Referral -->
+                    <div class="glass-card rounded-2xl p-6 border border-white/5">
+                        <h3 class="text-sm font-bold text-white mb-1">Perbaiki Data Leaderboard Referral</h3>
+                        <p class="text-xs text-slate-400 mb-4">Isi ulang <span class="font-mono text-purple-400">totalReferralEarned</span> untuk user yang sudah punya saldo referral tapi belum tercatat di Leaderboard (biasanya karena bonus diberikan sebelum fitur leaderboard ada). Aman dijalankan berkali-kali, tidak akan menduplikasi data yang sudah benar.</p>
+                        <button id="btnRepairLeaderboard" onclick="repairReferralLeaderboardData()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition flex items-center gap-2">
+                            <i class="fa-solid fa-wrench"></i> <span id="btnRepairLeaderboardText">Jalankan Perbaikan</span>
+                        </button>
+                        <p id="repairLeaderboardResult" class="text-xs text-slate-400 mt-3"></p>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: DETAIL REFERRAL -->
+    <div id="referralDetailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-2xl w-full p-6 rounded-3xl border border-slate-700 shadow-2xl relative flex flex-col max-h-[90vh]">
+            <button onclick="closeReferralModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 w-8 h-8 rounded-full flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="mb-5">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-users text-purple-400"></i> Detail Teman Referral
+                </h3>
+                <p id="refModalUserLabel" class="text-xs text-slate-400 mt-1 font-mono"></p>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar border border-white/5 rounded-xl bg-slate-950/50 mb-5 max-h-[50vh]">
+                <table class="w-full text-left text-xs whitespace-nowrap">
+                    <thead class="bg-slate-900 sticky top-0 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-white/5">
+                        <tr>
+                            <th class="p-4">Akun Teman</th>
+                            <th class="p-4 text-center">Total Setor</th>
+                            <th class="p-4 text-center">Bonus Diterima</th>
+                            <th class="p-4 text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="refModalTbody" class="divide-y divide-white/5 text-slate-300"></tbody>
+                </table>
+            </div>
+            <button onclick="closeReferralModal()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition">Tutup</button>
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT SALDO -->
+    <div id="balanceModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-sm w-full p-6 rounded-3xl border border-slate-700 shadow-2xl relative">
+            <button onclick="closeBalanceModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/5 w-8 h-8 rounded-full flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="mb-5">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-coins text-emerald-400"></i> Kelola Saldo User
+                </h3>
+                <p id="modalUserEmail" class="text-xs text-slate-400 mt-1 font-mono truncate"></p>
+            </div>
+
+            <div class="space-y-4">
+                <input type="hidden" id="editUid">
+                
+                <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex justify-between items-center shadow-inner">
+                    <span class="text-xs text-slate-400">Saldo Saat Ini</span>
+                    <span id="modalCurrentBalance" class="text-sm font-bold text-emerald-400">Rp 0</span>
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-slate-400 uppercase block mb-2">Aksi Pengisian</label>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <label class="cursor-pointer p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center gap-2 text-slate-300 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10 has-[:checked]:text-emerald-400 transition">
+                            <input type="radio" name="balanceMode" value="add" checked class="hidden" onchange="updateCalcPreview()">
+                            <span class="font-bold">+ Tambah</span>
+                        </label>
+                        <label class="cursor-pointer p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center gap-2 text-slate-300 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10 has-[:checked]:text-blue-400 transition">
+                            <input type="radio" name="balanceMode" value="set" class="hidden" onchange="updateCalcPreview()">
+                            <span class="font-bold">= Timpa (Set)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-slate-400 uppercase block mb-2">Nominal (Rp)</label>
+                    <input type="number" id="editNominal" placeholder="Contoh: 15000" class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white outline-none focus:border-emerald-500 transition" oninput="updateCalcPreview()">
+                </div>
+
+                <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex justify-between items-center">
+                    <span class="text-[11px] font-bold text-emerald-400/70 uppercase">Estimasi Akhir</span>
+                    <span id="modalPreviewBalance" class="font-black text-emerald-400 text-sm">Rp 0</span>
+                </div>
+
+                <button id="btnSaveBalance" onclick="saveBalance()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition text-sm shadow-lg shadow-emerald-600/20">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE MODULE & ADMIN LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, query, where, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbPe4CQJP9IWzRrOMeN96c60mZe0FjVpw",
+            authDomain: "mailmx-3bf2b.firebaseapp.com",
+            projectId: "mailmx-3bf2b",
+            storageBucket: "mailmx-3bf2b.firebasestorage.app",
+            messagingSenderId: "590976503111",
+            appId: "1:590976503111:web:948f8d92b657b169115062"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        setPersistence(auth, browserLocalPersistence);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        const ADMIN_EMAILS = ["caroluscitra08@gmail.com"];
+
+        let allUsersData = [];
+        let modalCurrentBalanceValue = 0;
+        let currentEditingUid = null;
+        
+        let allSubmissionsData = [];
+        let currentOpenSubId = null;
+        let currentOpenDateKey = null;
+        let lastRenderedGroups = {};
+
+        window.openDateAccordions = new Set();
+        let isAppInitialized = false; 
+
+        // -------------------------
+        // STATUS STOR GMAIL (OPEN/CLOSE) — diatur dari sini, tidak perlu ubah kode
+        // -------------------------
+        let storGmailOpen = true; // default aman: terbuka, sampai data dari Firestore masuk
+        let unsubscribeStorStatus = null;
+
+        function setupStorStatusListener() {
+            if (unsubscribeStorStatus) unsubscribeStorStatus();
+            const settingsRef = doc(db, "settings", "general");
+            unsubscribeStorStatus = onSnapshot(settingsRef, (snap) => {
+                const data = snap.exists() ? snap.data() : {};
+                storGmailOpen = data.storGmailOpen !== false;
+                acceptedPasswords = Array.isArray(data.acceptedPasswords) ? data.acceptedPasswords : ["fineirga", "prabujaya", "sgsg1122", "aass1122"];
+                renderStorStatusUI();
+                renderPasswordList();
+            }, (err) => {
+                console.error("Gagal memuat status stor gmail:", err);
+                renderStorStatusError(err);
+            });
+        }
+
+        function renderStorStatusError(err) {
+            const isPermission = err && (err.code === 'permission-denied' || String(err.message || '').includes('permission'));
+            const msg = isPermission
+                ? "Gagal (Izin Firestore Rules belum diatur untuk koleksi \"settings\")"
+                : "Gagal memuat status: " + (err?.message || 'unknown error');
+
+            ['storStatusBadge', 'storStatusBadgeFull'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.className = "text-[10px] font-black px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/25"; el.textContent = "ERROR"; }
+            });
+            ['btnToggleStorStatusText', 'btnToggleStorStatusFullText'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = msg;
+            });
+            const list = document.getElementById('password-list');
+            if (list) list.innerHTML = `<p class="text-xs text-red-400">${msg}. Cek Firestore Security Rules kamu (lihat panduan yang diberikan Claude).</p>`;
+        }
+
+        function renderStorStatusUI() {
+            const targets = [
+                { card: 'storStatusCard', badge: 'storStatusBadge', btn: 'btnToggleStorStatus', btnText: 'btnToggleStorStatusText', compact: true },
+                { card: 'storStatusCardFull', badge: 'storStatusBadgeFull', btn: 'btnToggleStorStatusFull', btnText: 'btnToggleStorStatusFullText', compact: false }
+            ];
+
+            targets.forEach(t => {
+                const card = document.getElementById(t.card);
+                const badge = document.getElementById(t.badge);
+                const btn = document.getElementById(t.btn);
+                const btnText = document.getElementById(t.btnText);
+                if (!card || !badge || !btn || !btnText) return;
+
+                const btnBase = t.compact
+                    ? "w-full mt-2 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2"
+                    : "px-5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2";
+                const cardBase = t.compact
+                    ? "rounded-xl border p-3.5 transition-colors"
+                    : "rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors";
+
+                if (storGmailOpen) {
+                    card.className = `${cardBase} border-emerald-500/25 bg-emerald-500/5`;
+                    badge.className = t.compact
+                        ? "text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25"
+                        : "text-xs font-black px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25";
+                    badge.textContent = "OPEN";
+                    btn.className = `${btnBase} bg-red-600 hover:bg-red-500 text-white`;
+                    btnText.textContent = "Tutup Stor Gmail";
+                } else {
+                    card.className = `${cardBase} border-red-500/25 bg-red-500/5`;
+                    badge.className = t.compact
+                        ? "text-[10px] font-black px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/25"
+                        : "text-xs font-black px-3 py-1 rounded-full bg-red-500/15 text-red-400 border border-red-500/25";
+                    badge.textContent = "CLOSED";
+                    btn.className = `${btnBase} bg-emerald-600 hover:bg-emerald-500 text-white`;
+                    btnText.textContent = "Buka Stor Gmail";
+                }
+            });
+        }
+
+        window.toggleStorGmailStatus = async function() {
+            const newStatus = !storGmailOpen;
+            const btn = document.getElementById('btnToggleStorStatus');
+            const btnFull = document.getElementById('btnToggleStorStatusFull');
+            if (btn) btn.disabled = true;
+            if (btnFull) btnFull.disabled = true;
+            try {
+                await setDoc(doc(db, "settings", "general"), { storGmailOpen: newStatus, updatedAt: Date.now() }, { merge: true });
+            } catch (err) {
+                alert("Gagal mengubah status: " + err.message);
+            } finally {
+                if (btn) btn.disabled = false;
+                if (btnFull) btnFull.disabled = false;
+            }
+        };
+
+        // -------------------------
+        // PASSWORD STOR GMAIL YANG DITERIMA — diatur bebas dari sini, tanpa ubah kode
+        // -------------------------
+        let acceptedPasswords = [];
+
+        function renderPasswordList() {
+            const container = document.getElementById('password-list');
+            if (!container) return;
+            if (acceptedPasswords.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-500 italic">Belum ada password. Tambahkan minimal 1 di bawah supaya user bisa stor gmail.</p>';
+                return;
+            }
+            container.innerHTML = acceptedPasswords.map(p => `
+                <div class="flex items-center justify-between px-4 py-2.5 bg-slate-900/60 border border-white/5 rounded-xl">
+                    <span class="font-mono text-sm text-emerald-400 font-bold">${p}</span>
+                    <button onclick="removeAcceptedPassword('${p.replace(/'/g, "\\'")}')" class="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center transition">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        window.addAcceptedPassword = async function() {
+            const input = document.getElementById('input-new-password');
+            const val = (input.value || '').trim();
+            if (!val) return;
+            if (acceptedPasswords.map(p => p.toLowerCase()).includes(val.toLowerCase())) {
+                alert('Password itu sudah ada di daftar.');
+                return;
+            }
+            const newList = [...acceptedPasswords, val];
+            try {
+                await setDoc(doc(db, "settings", "general"), { acceptedPasswords: newList, updatedAt: Date.now() }, { merge: true });
+                input.value = '';
+            } catch (err) {
+                alert("Gagal menambah password: " + err.message);
+            }
+        };
+
+        window.removeAcceptedPassword = async function(pwd) {
+            if (!confirm(`Hapus password "${pwd}" dari daftar yang diterima?`)) return;
+            const newList = acceptedPasswords.filter(p => p !== pwd);
+            try {
+                await setDoc(doc(db, "settings", "general"), { acceptedPasswords: newList, updatedAt: Date.now() }, { merge: true });
+            } catch (err) {
+                alert("Gagal menghapus password: " + err.message);
+            }
+        };
+
+        // -------------------------
+        // PERBAIKAN DATA LEADERBOARD REFERRAL
+        // -------------------------
+        // Menghitung ulang totalReferralEarned tiap pengundang berdasarkan data
+        // PERMANEN di dokumen masing-masing teman (referralBonusAmount), bukan dari
+        // referralBalance yang bisa berubah/direset ke 0 saat sudah diklaim user.
+        // Aman dijalankan berkali-kali (idempotent) — hanya menulis jika ada selisih.
+        window.repairReferralLeaderboardData = async function() {
+            const btn = document.getElementById('btnRepairLeaderboard');
+            const btnText = document.getElementById('btnRepairLeaderboardText');
+            const resultEl = document.getElementById('repairLeaderboardResult');
+            if (!btn || !btnText || !resultEl) return;
+
+            btn.disabled = true;
+            btnText.textContent = "Memproses...";
+            resultEl.textContent = "";
+
+            try {
+                const snap = await getDocs(collection(db, "users"));
+                const allUsers = [];
+                snap.forEach(d => allUsers.push({ id: d.id, ...d.data() }));
+
+                const totals = {};
+                allUsers.forEach(u => {
+                    if (u.referredBy && u.referralBonusGiven && (u.referralBonusAmount || 0) > 0) {
+                        totals[u.referredBy] = (totals[u.referredBy] || 0) + u.referralBonusAmount;
+                    }
+                });
+
+                let fixedCount = 0;
+                for (const [referrerId, total] of Object.entries(totals)) {
+                    const referrer = allUsers.find(u => u.id === referrerId);
+                    const current = referrer?.totalReferralEarned || 0;
+                    if (current !== total) {
+                        await updateDoc(doc(db, "users", referrerId), { totalReferralEarned: total });
+                        fixedCount++;
+                    }
+                }
+
+                resultEl.textContent = fixedCount > 0
+                    ? `Selesai! ${fixedCount} akun pengundang berhasil diperbaiki datanya. Coba cek Leaderboard lagi sekarang.`
+                    : `Selesai. Semua data sudah sinkron — tidak ada yang perlu diperbaiki.`;
+                resultEl.className = "text-xs text-emerald-400 mt-3 font-semibold";
+
+                allUsersData = [];
+            } catch (err) {
+                resultEl.textContent = "Gagal: " + err.message;
+                resultEl.className = "text-xs text-red-400 mt-3 font-semibold";
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = "Jalankan Perbaikan";
+            }
+        };
+
+        window.handleAdminLogin = async function () {
+            const btn = document.getElementById('adminLoginBtn');
+            const btnText = document.getElementById('adminLoginBtnText');
+            btn.disabled = true;
+            btnText.textContent = "Connecting...";
+            try { await signInWithPopup(auth, provider); } 
+            catch (err) {
+                document.getElementById('adminAuthError').textContent = err.message;
+                document.getElementById('adminAuthError').classList.remove('hidden');
+                btn.disabled = false;
+                btnText.textContent = "Login with Google";
+            }
+        };
+
+        window.handleLogout = function () { signOut(auth).then(() => location.reload()); };
+
+        window.switchAdminSection = function(sectionId) {
+            document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('section-' + sectionId);
+            
+            target.classList.remove('hidden');
+            if (sectionId === 'submissions') target.classList.add('flex'); 
+
+            document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+                btn.className = "admin-nav-btn w-full flex items-center justify-between px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl text-xs font-bold transition";
+            });
+
+            const activeBtn = document.getElementById('btn-sec-' + sectionId);
+            if (activeBtn) activeBtn.className = "admin-nav-btn active w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition";
+
+            if (sectionId === 'submissions') loadSubmissions();
+            else if (sectionId === 'withdrawals') loadWithdrawals();
+            else if (sectionId === 'users') loadUsers();
+            else if (sectionId === 'referrals') loadReferrals();
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user && ADMIN_EMAILS.includes(user.email)) {
+                document.getElementById('admin-login-screen').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                document.getElementById('admin-dashboard').classList.add('flex');
+                
+                if (!isAppInitialized) {
+                    loadUsers(); 
+                    loadSubmissions(); 
+                    loadWithdrawals();
+                    setupStorStatusListener();
+                    isAppInitialized = true;
+                }
+            } else if (user) {
+                document.getElementById('adminAuthError').textContent = "Akses Ditolak! Akun bukan Admin.";
+                document.getElementById('adminAuthError').classList.remove('hidden');
+                await signOut(auth);
+                isAppInitialized = false;
+            } else {
+                document.getElementById('admin-login-screen').classList.remove('hidden');
+                document.getElementById('admin-dashboard').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('flex');
+                isAppInitialized = false;
+            }
+        });
+
+        // -------------------------
+        // USERS & REFERRALS LOGIC 
+        // -------------------------
+        window.loadUsers = async function() {
+            const tbody = document.getElementById('users-tbody');
+            tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">Memuat data...</td></tr>';
+            try {
+                const querySnapshot = await getDocs(query(collection(db, "users")));
+                allUsersData = [];
+                querySnapshot.forEach(doc => allUsersData.push({ id: doc.id, ...doc.data() }));
+                allUsersData.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                renderTable(allUsersData);
+            } catch (e) { tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-400">Error: ${e.message}</td></tr>`; }
+        };
+
+        function renderTable(data) {
+            const tbody = document.getElementById('users-tbody');
+            if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">Tidak ada user.</td></tr>'; return; }
+            
+            let html = '';
+            data.forEach(user => {
+                const balance = user.balance || 0;
+                // Cari teman yang diundang lewat field referredBy (bukan array tersimpan),
+                // supaya selalu akurat walau ditulis dari sesi berbeda-beda.
+                const friends = allUsersData.filter(u => u.referredBy === user.id);
+                const bonusGivenCount = friends.filter(f => f.referralBonusGiven === true).length;
+                const totalBonusRp = friends.reduce((sum, f) => sum + (f.referralBonusAmount || 0), 0);
+                const dateJoined = user.createdAt ? new Date(user.createdAt).toLocaleDateString('id-ID') : '-';
+                
+                html += `
+                    <tr class="hover:bg-white/5 transition border-b border-white/5 last:border-0">
+                        <td class="p-4"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-xs border border-blue-500/20">${user.name ? user.name.charAt(0).toUpperCase() : '?'}</div><div><span class="block font-bold text-white text-xs">${user.name}</span><span class="block text-[10px] text-slate-400 font-mono">${user.email}</span></div></div></td>
+                        <td class="p-4"><span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 font-mono font-bold rounded-lg border border-emerald-500/20">Rp ${balance.toLocaleString('id-ID')}</span></td>
+                        <td class="p-4"><span class="block text-purple-400 font-bold text-xs">${bonusGivenCount} Sudah Bonus / ${friends.length} Total</span><span class="block text-[10px] text-slate-500">Total Bonus: Rp ${totalBonusRp.toLocaleString('id-ID')}</span></td>
+                        <td class="p-4"><span class="block text-xs text-slate-300 font-mono">${user.ip || 'Unknown IP'}</span><span class="block text-[10px] text-slate-500">${dateJoined}</span></td>
+                        <td class="p-4 text-right"><button onclick="openBalanceModal('${user.id}', '${user.email}', ${balance})" class="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg text-[10px] font-bold transition inline-flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square"></i> Edit Saldo</button></td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        window.loadReferrals = async function() {
+            const tbody = document.getElementById('referrals-tbody');
+            tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500 italic">Memuat data...</td></tr>';
+            try {
+                if(allUsersData.length === 0){ const snap = await getDocs(collection(db, "users")); allUsersData = []; snap.forEach(d => allUsersData.push({id: d.id, ...d.data()})); }
+
+                // Kumpulkan semua uid pengundang unik berdasarkan field referredBy milik teman
+                const inviterIds = [...new Set(allUsersData.filter(u => u.referredBy).map(u => u.referredBy))];
+                const inviterUsers = inviterIds.map(id => allUsersData.find(u => u.id === id)).filter(Boolean);
+
+                if (inviterUsers.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500 italic">Belum ada user yang mengundang teman.</td></tr>'; return; }
+                
+                let html = '';
+                inviterUsers.forEach(u => {
+                    const friends = allUsersData.filter(f => f.referredBy === u.id);
+                    const bonusGivenCount = friends.filter(f => f.referralBonusGiven === true).length;
+                    const totalBonusRp = friends.reduce((sum, f) => sum + (f.referralBonusAmount || 0), 0);
+                    const unclaimedRp = u.referralBalance || 0;
+                    html += `
+                        <tr class="hover:bg-white/5 transition border-b border-white/5">
+                            <td class="p-4"><span class="font-bold text-white text-xs block">${u.name}</span><span class="text-[10px] text-slate-400 font-mono">${u.email}</span></td>
+                            <td class="p-4"><span class="font-bold text-xs text-slate-300">${friends.length} Teman</span></td>
+                            <td class="p-4"><span class="font-bold text-xs ${bonusGivenCount > 0 ? 'text-emerald-400' : 'text-slate-300'}">${bonusGivenCount} Teman</span></td>
+                            <td class="p-4"><span class="text-purple-400 font-bold text-xs font-mono">Rp ${totalBonusRp.toLocaleString('id-ID')}</span></td>
+                            <td class="p-4"><span class="text-amber-400 font-bold text-xs font-mono">Rp ${unclaimedRp.toLocaleString('id-ID')}</span></td>
+                            <td class="p-4 text-right"><button onclick="openReferralModal('${u.id}')" class="px-3 py-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold rounded-lg text-[10px] inline-flex items-center gap-1.5"><i class="fa-solid fa-list"></i> Detail</button></td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch (e) { tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-400">Error: ${e.message}</td></tr>`; }
+        };
+
+        window.openReferralModal = function(uid) {
+            const user = allUsersData.find(u => u.id === uid);
+            if(!user) return;
+            document.getElementById('refModalUserLabel').textContent = `${user.name} (${user.email})`;
+            const tbody = document.getElementById('refModalTbody');
+            
+            const friends = allUsersData.filter(f => f.referredBy === uid);
+            let html = '';
+            friends.forEach((r, idx) => {
+                const statusBadge = r.referralBonusGiven 
+                    ? `<span class="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 text-[10px] font-bold">BONUS DITERIMA</span>` 
+                    : `<span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700 text-[10px] font-bold">BELUM SETOR</span>`;
+                const bonusRp = r.referralBonusAmount || 0;
+                html += `<tr class="border-b border-white/5"><td class="p-4"><span class="font-bold text-white text-xs block">Teman ${idx+1}</span><span class="text-[10px] font-mono text-slate-400">${r.name}</span></td><td class="p-4 text-center text-xs">${r.totalSubmittedAccumulated || 0}</td><td class="p-4 text-center text-xs ${bonusRp > 0 ? 'text-emerald-400' : 'text-slate-300'} font-bold">Rp ${bonusRp.toLocaleString('id-ID')}</td><td class="p-4 text-right">${statusBadge}</td></tr>`;
+            });
+            tbody.innerHTML = html || '<tr><td colspan="4" class="p-8 text-center text-slate-500 italic">Belum ada teman.</td></tr>';
+            
+            document.getElementById('referralDetailModal').classList.remove('hidden'); document.getElementById('referralDetailModal').classList.add('flex');
+        };
+        window.closeReferralModal = function() { document.getElementById('referralDetailModal').classList.add('hidden'); document.getElementById('referralDetailModal').classList.remove('flex'); };
+        
+        window.filterTable = function() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            renderTable(allUsersData.filter(u => (u.name && u.name.toLowerCase().includes(input)) || (u.email && u.email.toLowerCase().includes(input))));
+        };
+
+        // -------------------------
+        // SISTEM SETORAN GMAIL 
+        // -------------------------
+        
+        const monthsIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+        window.loadSubmissions = async function(keepDetailOpen = false) {
+            if (!keepDetailOpen) {
+                closeSubmissionDetail();
+            }
+            const container = document.getElementById('submissions-list-view');
+            container.innerHTML = '<div class="p-8 text-center text-slate-500 italic glass-card rounded-2xl border border-white/5">Memuat data setoran database...</div>';
+            
+            try {
+                const querySnapshot = await getDocs(collection(db, "submissions"));
+                allSubmissionsData = [];
+                let pendingCount = 0;
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const subItem = { id: docSnap.id, ...data };
+
+                    if (!subItem.emailResults || subItem.emailResults.length === 0) {
+                        const rawList = subItem.gmailList || "";
+                        subItem.emailResults = rawList.split('\n').map(e => e.trim()).filter(e => e.length > 0).map(em => ({
+                            email: em,
+                            status: 'Proses'
+                        }));
+                    }
+                    
+                    if (!data.status || data.status === 'Proses') pendingCount++;
+                    allSubmissionsData.push(subItem);
+                });
+
+                const badge = document.getElementById('badgePendingSub');
+                if (pendingCount > 0) {
+                    badge.textContent = pendingCount;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+
+                renderSubmissions();
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="p-8 text-center text-red-400 glass-card rounded-2xl">Error: ${err.message}</div>`;
+            }
+        };
+
+        window.renderSubmissions = function() {
+            const container = document.getElementById('submissions-list-view');
+            const searchInput = document.getElementById('subSearchInput').value.toLowerCase();
+            
+            const groups = {};
+            let hasMatch = false;
+
+            allSubmissionsData.forEach(sub => {
+                const matchSearch = (sub.userName && sub.userName.toLowerCase().includes(searchInput)) || 
+                                    (sub.userEmail && sub.userEmail.toLowerCase().includes(searchInput));
+                
+                if (searchInput && !matchSearch) return;
+                hasMatch = true;
+
+                const dateObj = sub.createdAt ? new Date(sub.createdAt) : new Date();
+                const dateKey = `${dateObj.getDate()} ${monthsIndo[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+                const timestampKey = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()).getTime();
+
+                if (!groups[dateKey]) groups[dateKey] = { timestamp: timestampKey, items: [] };
+                groups[dateKey].items.push(sub);
+            });
+
+            if (!hasMatch) {
+                container.innerHTML = '<div class="p-8 text-center text-slate-500 italic glass-card rounded-2xl border border-white/5">Tidak ada data yang cocok dengan pencarian.</div>';
+                return;
+            }
+
+            lastRenderedGroups = groups;
+
+            const sortedDates = Object.keys(groups).sort((a, b) => groups[b].timestamp - groups[a].timestamp);
+            
+            let containerHtml = '';
+            
+            sortedDates.forEach((dateKey) => {
+                const group = groups[dateKey];
+                group.items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                
+                const totalUsers = group.items.length;
+                const totalData = group.items.reduce((sum, item) => sum + (item.emailResults ? item.emailResults.length : 0), 0);
+                const safeId = dateKey.replace(/\s/g, '-');
+                
+                if (currentOpenDateKey === dateKey) {
+                    window.openDateAccordions.add(safeId);
+                }
+
+                const isOpen = searchInput !== '' || window.openDateAccordions.has(safeId);
+
+                // Ringkasan copy cepat per password (pisahkan storan berdasarkan password)
+                const passwordMap = {};
+                group.items.forEach(sub => {
+                    const pwd = sub.password || '(Tanpa Password)';
+                    if (!passwordMap[pwd]) passwordMap[pwd] = 0;
+                    passwordMap[pwd] += (sub.emailResults ? sub.emailResults.length : 0);
+                });
+                const passwordKeys = Object.keys(passwordMap);
+                const dateKeyEscaped = dateKey.replace(/'/g, "\\'");
+
+                let passwordSummaryHtml = '';
+                if (passwordKeys.length > 0) {
+                    passwordSummaryHtml = `
+                        <div class="mb-4 p-3.5 bg-blue-500/5 border border-blue-500/20 rounded-xl space-y-2.5">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <p class="text-[11px] font-bold text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-layer-group"></i> Copy Cepat per Password
+                                </p>
+                                ${passwordKeys.length > 1 ? `
+                                <button onclick="copyAllDateStorage('${dateKeyEscaped}')" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold rounded-lg transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-copy"></i> Copy Semua Password Hari Ini
+                                </button>` : ''}
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                ${passwordKeys.map(pwd => `
+                                    <button onclick="copyByPasswordGroup('${dateKeyEscaped}', '${pwd.replace(/'/g, "\\'")}')" class="px-3 py-2 bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-500 text-white text-[11px] font-bold rounded-lg transition flex items-center gap-2">
+                                        <i class="fa-solid fa-copy"></i> ${pwd} <span class="text-slate-400">(${passwordMap[pwd]})</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                let usersHtml = group.items.map(sub => {
+                    const totalEmails = sub.emailResults ? sub.emailResults.length : 0;
+                    
+                    let statusLabel = '';
+                    if(sub.status === 'Proses' || !sub.status) statusLabel = '<span class="text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded text-[10px]">Menunggu</span>';
+                    else if(sub.status === 'Good') statusLabel = '<span class="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px]">Selesai</span>';
+                    else statusLabel = `<span class="text-slate-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-[10px]">${sub.status}</span>`;
+
+                    return `
+                        <div class="glass-card p-4 rounded-xl border border-white/5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-slate-900/50 hover:bg-slate-800/80 transition">
+                            <div>
+                                <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                                    👤 ${sub.userName} ${statusLabel}
+                                </h4>
+                                <p class="text-xs text-slate-400 mt-1">Email: ${sub.userEmail} • Total data: ${totalEmails}</p>
+                            </div>
+                            <button onclick="openSubmissionDetail('${sub.id}', '${dateKey}')" class="px-5 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-lg transition whitespace-nowrap shadow-md">
+                                BUKA SETORAN
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+
+                containerHtml += `
+                    <div class="glass-card rounded-2xl border border-white/5 overflow-hidden">
+                        <button onclick="toggleDateAcc('${safeId}')" class="w-full flex justify-between items-center p-4 bg-slate-900/80 hover:bg-slate-800 transition focus:outline-none">
+                            <div class="flex items-center gap-3">
+                                <i id="icon-${safeId}" class="fa-solid fa-caret-${isOpen ? 'down' : 'right'} text-slate-400 w-3 text-center transition-transform"></i>
+                                <span class="font-bold text-white text-sm">📅 ${dateKey}</span>
+                            </div>
+                            <span class="text-xs text-slate-400 font-bold">${totalUsers} User • ${totalData} Data</span>
+                        </button>
+                        <div id="content-${safeId}" class="${isOpen ? 'block' : 'hidden'} p-4 border-t border-white/5 space-y-3 bg-slate-950/30">
+                            ${passwordSummaryHtml}
+                            ${usersHtml}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = containerHtml;
+        };
+
+        window.toggleDateAcc = function(safeId) {
+            const content = document.getElementById('content-' + safeId);
+            const icon = document.getElementById('icon-' + safeId);
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.remove('fa-caret-right');
+                icon.classList.add('fa-caret-down');
+                window.openDateAccordions.add(safeId);
+            } else {
+                content.classList.add('hidden');
+                icon.classList.remove('fa-caret-down');
+                icon.classList.add('fa-caret-right');
+                window.openDateAccordions.delete(safeId);
+                
+                if (currentOpenDateKey && safeId === currentOpenDateKey.replace(/\s/g, '-')) {
+                    currentOpenDateKey = null;
+                }
+            }
+        };
+
+        window.openSubmissionDetail = function(subId, dateStr) {
+            const sub = allSubmissionsData.find(s => s.id === subId);
+            if (!sub) return;
+            
+            currentOpenSubId = subId;
+            currentOpenDateKey = dateStr; 
+            
+            const safeId = dateStr.replace(/\s/g, '-');
+            window.openDateAccordions.add(safeId);
+            
+            document.getElementById('submissions-list-view').classList.add('hidden');
+            document.getElementById('submission-detail-view').classList.remove('hidden');
+            document.getElementById('submission-detail-view').classList.add('flex');
+
+            document.getElementById('detail-user-name').textContent = `👤 ${sub.userName}`;
+            document.getElementById('detail-date').textContent = dateStr;
+            document.getElementById('detail-total').textContent = sub.emailResults ? sub.emailResults.length : 0;
+            document.getElementById('detail-wa').textContent = sub.waNumber || '-';
+            document.getElementById('detail-pass').textContent = sub.password || '-';
+
+            const tbody = document.getElementById('detail-tbody');
+            let rowsHtml = '';
+
+            sub.emailResults.forEach((item, index) => {
+                const isPending = item.status === 'Proses';
+                let colorClass = 'text-slate-400 bg-slate-800';
+                
+                if (item.status === 'Good') colorClass = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+                else if (item.status === 'Disabled') colorClass = 'text-red-400 bg-red-500/10 border-red-500/20';
+                else if (item.status === 'Verif' || item.status === 'Not exist') colorClass = 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+
+                rowsHtml += `
+                    <tr class="hover:bg-white/5 transition border-b border-white/5">
+                        <td class="p-4 font-mono text-slate-300 text-xs">
+                            <span class="text-slate-600 mr-2">${index + 1}.</span> ${item.email}
+                        </td>
+                        <td class="p-3 w-40">
+                            <select id="status-sel-${index}" onchange="updateSelectColor(this)" class="w-full px-2 py-2 rounded-lg text-xs font-bold outline-none border border-transparent cursor-pointer text-center appearance-none ${colorClass} shadow-sm">
+                                <option value="Proses" ${isPending ? 'selected' : ''}>Proses</option>
+                                <option value="Good" ${item.status === 'Good' ? 'selected' : ''}>Good</option>
+                                <option value="Disabled" ${item.status === 'Disabled' ? 'selected' : ''}>Disabled</option>
+                                <option value="Verif" ${item.status === 'Verif' ? 'selected' : ''}>Verif</option>
+                                <option value="Not exist" ${item.status === 'Not exist' ? 'selected' : ''}>Not exist</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = rowsHtml;
+        };
+
+        // FUNGSI COPY SEMUA STORAN
+        window.copyAllStorage = function() {
+            if (!currentOpenSubId) return;
+            const sub = allSubmissionsData.find(s => s.id === currentOpenSubId);
+            if (!sub || !sub.emailResults || sub.emailResults.length === 0) {
+                alert("Tidak ada data storan untuk disalin.");
+                return;
+            }
+
+            const textToCopy = sub.emailResults.map(item => item.email).join('\n');
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const btn = event.currentTarget;
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Tersalin!';
+                btn.classList.remove('bg-blue-600', 'hover:bg-blue-500');
+                btn.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
+                    btn.classList.add('bg-blue-600', 'hover:bg-blue-500');
+                }, 2000);
+            }).catch(err => {
+                alert("Gagal menyalin teks: " + err);
+            });
+        };
+
+        // Copy semua email dari SEMUA user pada tanggal tertentu, HANYA yang
+        // berpassword sama (storan dengan password berbeda tidak tercampur).
+        window.copyByPasswordGroup = function(dateKey, password) {
+            const group = lastRenderedGroups[dateKey];
+            if (!group) { alert('Data tidak ditemukan, coba refresh halaman.'); return; }
+
+            const emails = [];
+            group.items.forEach(sub => {
+                const subPass = sub.password || '(Tanpa Password)';
+                if (subPass === password && sub.emailResults) {
+                    sub.emailResults.forEach(item => emails.push(item.email));
+                }
+            });
+
+            if (emails.length === 0) {
+                alert('Tidak ada data untuk password ini.');
+                return;
+            }
+
+            const textToCopy = emails.join('\n');
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const btn = event.currentTarget;
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> Tersalin (${emails.length})!`;
+                setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+            }).catch(err => {
+                alert("Gagal menyalin teks: " + err);
+            });
+        };
+
+        // Copy SEMUA email pada tanggal tertentu, gabungan semua password —
+        // dikelompokkan per password dengan judul pemisah supaya tetap jelas.
+        window.copyAllDateStorage = function(dateKey) {
+            const group = lastRenderedGroups[dateKey];
+            if (!group) { alert('Data tidak ditemukan, coba refresh halaman.'); return; }
+
+            const byPassword = {};
+            group.items.forEach(sub => {
+                const pwd = sub.password || '(Tanpa Password)';
+                if (!byPassword[pwd]) byPassword[pwd] = [];
+                if (sub.emailResults) sub.emailResults.forEach(item => byPassword[pwd].push(item.email));
+            });
+
+            const passwords = Object.keys(byPassword);
+            if (passwords.length === 0) {
+                alert('Tidak ada data untuk tanggal ini.');
+                return;
+            }
+
+            const textToCopy = passwords.map(pwd => {
+                return `=== PASSWORD: ${pwd} (${byPassword[pwd].length}) ===\n${byPassword[pwd].join('\n')}`;
+            }).join('\n\n');
+
+            const totalCount = passwords.reduce((sum, pwd) => sum + byPassword[pwd].length, 0);
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const btn = event.currentTarget;
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> Tersalin (${totalCount})!`;
+                setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+            }).catch(err => {
+                alert("Gagal menyalin teks: " + err);
+            });
+        };
+
+        window.updateSelectColor = function(el) {
+            const val = el.value;
+            let c = 'text-slate-400 bg-slate-800 border-transparent';
+            if(val === 'Good') c = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+            else if(val === 'Disabled') c = 'text-red-400 bg-red-500/10 border-red-500/20';
+            else if(val === 'Verif' || val === 'Not exist') c = 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+            
+            el.className = `w-full px-2 py-2 rounded-lg text-xs font-bold outline-none border cursor-pointer text-center appearance-none shadow-sm ${c}`;
+        };
+
+        window.closeSubmissionDetail = function() {
+            document.getElementById('submission-detail-view').classList.add('hidden');
+            document.getElementById('submission-detail-view').classList.remove('flex');
+            document.getElementById('submissions-list-view').classList.remove('hidden');
+            
+            currentOpenSubId = null;
+
+            if (currentOpenDateKey) {
+                const safeId = currentOpenDateKey.replace(/\s/g, '-');
+                
+                window.openDateAccordions.add(safeId);
+                
+                const content = document.getElementById('content-' + safeId);
+                const icon = document.getElementById('icon-' + safeId);
+                
+                if (content && content.classList.contains('hidden')) {
+                    content.classList.remove('hidden');
+                    icon.classList.remove('fa-caret-right');
+                    icon.classList.add('fa-caret-down');
+                }
+                
+                setTimeout(() => {
+                    if (icon) {
+                        const cardElement = icon.closest('.glass-card');
+                        if (cardElement) {
+                            cardElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
+                }, 100);
+            }
+        };
+
+        window.saveSubmissionDetail = async function() {
+            if (!currentOpenSubId) return;
+            const sub = allSubmissionsData.find(s => s.id === currentOpenSubId);
+            if (!sub) return;
+
+            const btn = document.getElementById('btn-save-sub');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+            try {
+                let good = 0, disabled = 0, verif = 0, notExist = 0, proses = 0;
+                
+                const updatedEmails = sub.emailResults.map((item, index) => {
+                    const selectEl = document.getElementById(`status-sel-${index}`);
+                    const finalStatus = selectEl ? selectEl.value : item.status;
+                    
+                    if (finalStatus === 'Good') good++;
+                    else if (finalStatus === 'Disabled') disabled++;
+                    else if (finalStatus === 'Verif') verif++;
+                    else if (finalStatus === 'Not exist') notExist++;
+                    else proses++;
+
+                    return { email: item.email, status: finalStatus };
+                });
+
+                if (proses > 0) {
+                    const conf = confirm(`Terdapat ${proses} data yang statusnya masih "Proses" (Belum diperiksa). Yakin ingin menyimpan?`);
+                    if (!conf) {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Simpan Hasil';
+                        return;
+                    }
+                }
+
+                let overallStatus = "Proses";
+                if (good > 0) overallStatus = "Good";
+                else if (disabled > 0 || verif > 0 || notExist > 0) overallStatus = "Disabled";
+
+                // Harga flat: Rp 4.500 / Gmail Good, berapa pun jumlah setorannya.
+                const finalRate = 4500;
+
+                const totalRpValid = good * finalRate;
+
+                const subRef = doc(db, "submissions", sub.id);
+                const freshSub = await getDoc(subRef);
+                const isAlreadyCredited = freshSub.exists() ? (freshSub.data().isCredited === true) : false;
+
+                await updateDoc(subRef, {
+                    emailResults: updatedEmails,
+                    stats: { good, disabled, verif, notExist },
+                    status: overallStatus,
+                    creditedRp: totalRpValid,
+                    isCredited: true 
+                });
+
+                let bonusInfoMsg = "";
+
+                if (sub.uid) {
+                    const userRef = doc(db, "users", sub.uid);
+                    const userSnapBefore = await getDoc(userRef);
+                    const userDataBefore = userSnapBefore.exists() ? userSnapBefore.data() : {};
+
+                    if (!isAlreadyCredited && totalRpValid > 0) {
+                        await updateDoc(userRef, { balance: increment(totalRpValid) });
+                    }
+
+                    // === BONUS REFERRAL 50% (HANYA STOR/PEMBAYARAN PERTAMA TEMAN) ===
+                    // Begitu teman mendapat pembayaran pertama kali, 50% dari nilai
+                    // pembayaran itu dipotong dari saldo teman dan masuk ke saldo pengundang.
+                    // Setoran-setoran berikutnya tidak dipotong lagi.
+                    // CATATAN ARSITEKTUR: seluruh info bonus disimpan di dokumen milik TEMAN
+                    // sendiri (referralBonusGiven, referralBonusAmount), bukan sebagai array di
+                    // dokumen pengundang. Ini karena tulisan ini dilakukan oleh sesi ADMIN yang
+                    // sudah terbukti punya izin tulis ke sembarang dokumen user (lihat kredit
+                    // saldo utama di atas), sehingga jauh lebih aman & konsisten daripada
+                    // mengandalkan sesi user biasa menulis ke dokumen user lain.
+                    if (!isAlreadyCredited && totalRpValid > 0 && userDataBefore.referredBy && !userDataBefore.referralBonusGiven) {
+                        const bonusAmount = Math.floor(totalRpValid * 0.5);
+                        const referrerRef = doc(db, "users", userDataBefore.referredBy);
+                        const referrerSnap = await getDoc(referrerRef);
+
+                        if (referrerSnap.exists() && bonusAmount > 0) {
+                            await updateDoc(userRef, {
+                                balance: increment(-bonusAmount),
+                                referralBonusGiven: true,
+                                referralBonusAmount: bonusAmount,
+                                referralBonusDate: Date.now()
+                            });
+                            await updateDoc(referrerRef, {
+                                referralBalance: increment(bonusAmount),
+                                totalReferralEarned: increment(bonusAmount)
+                            });
+
+                            bonusInfoMsg = `\n\nBonus Referral: Rp ${bonusAmount.toLocaleString('id-ID')} dipotong dari saldo user ini (setor pertama) dan masuk ke saldo pengundang.`;
+                        } else {
+                            // Pengundang tidak ditemukan, tandai supaya tidak dicoba lagi di setoran berikutnya
+                            await updateDoc(userRef, { referralBonusGiven: true });
+                        }
+                    }
+
+                    const subsSnap = await getDocs(query(collection(db, "submissions"), where("uid", "==", sub.uid)));
+                    let totalAccumulatedGood = 0, totalAccumulatedSubmitted = 0;
+                    subsSnap.forEach(s => {
+                        const sData = s.data();
+                        totalAccumulatedGood += (sData.stats?.good || 0);
+                        totalAccumulatedSubmitted += (sData.count || (sData.emailResults ? sData.emailResults.length : 0));
+                    });
+
+                    // Simpan akumulasi statistik langsung di dokumen milik user ini sendiri
+                    // (self-write dari sesi admin, selalu diizinkan) — dipakai panel referral
+                    // pengundang lewat query where("referredBy","==",uid), tanpa perlu
+                    // menyentuh dokumen pengundang sama sekali.
+                    await updateDoc(userRef, {
+                        totalGoodAccumulated: totalAccumulatedGood,
+                        totalSubmittedAccumulated: totalAccumulatedSubmitted
+                    });
+                }
+
+                alert(`Pekerjaan Tersimpan!\nData Good: ${good}\nRp ${totalRpValid.toLocaleString('id-ID')} dicatat ke sistem.${bonusInfoMsg}`);
+                
+                loadSubmissions(true); 
+                loadUsers(); 
+
+            } catch (err) {
+                alert("Gagal menyimpan: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Simpan Hasil';
+            }
+        };
+
+        // -------------------------
+        // EDIT SALDO (TETAP ADA)
+        // -------------------------
+        window.openBalanceModal = function(uid, email, currentBal) {
+            currentEditingUid = uid; modalCurrentBalanceValue = currentBal;
+            document.getElementById('editUid').value = uid; document.getElementById('modalUserEmail').textContent = email;
+            document.getElementById('modalCurrentBalance').textContent = `Rp ${currentBal.toLocaleString('id-ID')}`;
+            document.getElementById('editNominal').value = ''; document.querySelector('input[name="balanceMode"][value="add"]').checked = true;
+            document.getElementById('modalPreviewBalance').textContent = `Rp ${currentBal.toLocaleString('id-ID')}`;
+            document.getElementById('balanceModal').classList.remove('hidden'); document.getElementById('balanceModal').classList.add('flex');
+        };
+        window.closeBalanceModal = function() { document.getElementById('balanceModal').classList.add('hidden'); document.getElementById('balanceModal').classList.remove('flex'); };
+        window.updateCalcPreview = function() {
+            const mode = document.querySelector('input[name="balanceMode"]:checked').value;
+            const nominal = parseInt(document.getElementById('editNominal').value) || 0;
+            const preview = mode === 'add' ? modalCurrentBalanceValue + nominal : nominal;
+            document.getElementById('modalPreviewBalance').textContent = `Rp ${preview.toLocaleString('id-ID')}`;
+        };
+        window.saveBalance = async function() {
+            const uid = document.getElementById('editUid').value;
+            const mode = document.querySelector('input[name="balanceMode"]:checked').value;
+            const nominal = parseInt(document.getElementById('editNominal').value);
+            if (isNaN(nominal)) return alert("Masukkan nominal yang valid!");
+            let finalBalance = mode === 'add' ? modalCurrentBalanceValue + nominal : nominal;
+
+            const btn = document.getElementById('btnSaveBalance'); btn.disabled = true; btn.textContent = "Menyimpan...";
+            try {
+                await updateDoc(doc(db, "users", uid), { balance: finalBalance });
+                closeBalanceModal(); loadUsers();
+            } catch (err) { alert("Gagal: " + err.message); } 
+            finally { btn.disabled = false; btn.textContent = "Simpan Perubahan"; }
+        };
+
+        // -------------------------
+        // WITHDRAWALS (TETAP ADA)
+        // -------------------------
+        window.loadWithdrawals = async function() {
+            const tbody = document.getElementById('withdrawals-tbody');
+            tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500 italic">Memuat penarikan...</td></tr>';
+            try {
+                const querySnapshot = await getDocs(collection(db, "withdrawals"));
+                let withdrawals = []; let pendingWdCount = 0;
+                querySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (!data.status || data.status === 'Proses') pendingWdCount++;
+                    withdrawals.push({ id: docSnap.id, ...data });
+                });
+                withdrawals.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+                const badge = document.getElementById('badgePendingWd');
+                if (pendingWdCount > 0) { badge.textContent = pendingWdCount; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
+
+                if (withdrawals.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500 italic">Tidak ada penarikan.</td></tr>'; return; }
+                
+                let html = '';
+                withdrawals.forEach(item => {
+                    const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) : '-';
+                    const amountStr = `Rp ${(item.amount || 0).toLocaleString('id-ID')}`;
+                    let statusBadge = item.status === 'Sukses' ? `<span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold rounded text-[9px]">SUKSES</span>` : 
+                                      item.status === 'Gagal' ? `<span class="px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 font-bold rounded text-[9px]">DITOLAK</span>` : 
+                                      `<span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold rounded text-[9px]">PROSES</span>`;
+
+                    html += `
+                        <tr class="hover:bg-white/5 transition border-b border-white/5 last:border-0">
+                            <td class="p-4 text-slate-400 text-[11px]">${dateStr}</td>
+                            <td class="p-4"><span class="block font-bold text-white text-xs">${item.userName || 'User'}</span><span class="block text-[10px] text-slate-400 font-mono">${item.userEmail}</span></td>
+                            <td class="p-4"><span class="block font-bold text-white text-xs">${item.walletType || 'DANA'}</span><span class="block text-[10px] text-slate-400 font-mono">${item.walletNumber || '-'}</span></td>
+                            <td class="p-4 text-emerald-400 font-bold text-xs">${amountStr}</td>
+                            <td class="p-4">${statusBadge}</td>
+                            <td class="p-4 text-right space-x-1">
+                                <button onclick="updateWithdrawStatus('${item.id}', 'Sukses', '${item.uid}', ${item.amount})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-[10px] transition"><i class="fa-solid fa-check"></i></button>
+                                <button onclick="updateWithdrawStatus('${item.id}', 'Gagal', '${item.uid}', ${item.amount})" class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-[10px] transition"><i class="fa-solid fa-xmark"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch (err) { tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-400">Error: ${err.message}</td></tr>`; }
+        };
+
+        window.updateWithdrawStatus = async function(wdId, newStatus, uid = null, amount = 0) {
+            if (!confirm(`Ubah status menjadi "${newStatus}"?`)) return;
+            try {
+                await updateDoc(doc(db, "withdrawals", wdId), { status: newStatus });
+                if (newStatus === 'Gagal' && uid && amount > 0) {
+                    const userRef = doc(db, "users", uid);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) await updateDoc(userRef, { balance: (userSnap.data().balance || 0) + amount });
+                }
+                loadWithdrawals(); loadUsers();
+            } catch (err) { alert("Gagal update: " + err.message); }
+        };
+
+        window.addEventListener("DOMContentLoaded", () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });
+    </script>
+</body>
+</html>
